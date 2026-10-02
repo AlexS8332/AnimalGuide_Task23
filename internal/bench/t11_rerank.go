@@ -359,7 +359,8 @@ func (t *Rerank) judge(r *Result, m retrieve.Matrix, cal retrieve.Calibration) {
 	r.check(c)
 
 	// 4. Both не хуже base.
-	both := top5(mq(m, "both", dt...))
+	both, base := top5(mq(m, "both", dt...)), top5(mq(m, "base", dt...))
+	n = answerableN(mq(m, "base", dt...))
 	c = Check{What: rerankChecks[3], Want: "≥ base", Lane: laneRetrieve,
 		Got: fmt.Sprintf("base %d, both %d из %d", len(base), len(both), n), Status: Pass}
 	if len(both) < len(base) {

@@ -134,8 +134,8 @@ type Calibration struct {
 	// Правило выбора (добавления v23, исправление): Rule — "gap" (середина
 	// зазора) или "max-drop" (прежнее правило, зазора нет). OutMax — лучший
 	// косинус вопросов вне базы (out-of-base без якоря), EvidenceMin —
-	// наименьший косинус доказательства у неякорных dev (−1 — таких
-	// вопросов нет); Gap = EvidenceMin − OutMax; MarginOut и MarginDev —
+	// наименьший косинус доказательства у неякорных dev, чьё доказательство
+	// доходит до итога без пола (−1 — таких вопросов нет); Gap = EvidenceMin − OutMax; MarginOut и MarginDev —
 	// запас порога до них. FloorDev, FloorOut, FloorTest — вопросы,
 	// чувствительные к полу (вид в реплике не назван). At — строка таблицы
 	// с выбранным порогом (середина зазора может не совпасть с шагом).
@@ -150,5 +150,8 @@ type Calibration struct {
 	FloorDev      []string `json:"floor_dev,omitempty"`
 	FloorOut      []string `json:"floor_out,omitempty"`
 	FloorTest     []string `json:"floor_test,omitempty"`
-	At            CalibRow `json:"at"`
+	// FloorMissed — неякорные dev, чьё доказательство не доходит до итога и
+	// без пола: в зазор они не входят (пол их не теряет).
+	FloorMissed []string `json:"floor_missed,omitempty"`
+	At          CalibRow `json:"at"`
 }

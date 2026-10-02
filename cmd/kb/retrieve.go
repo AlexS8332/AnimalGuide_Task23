@@ -19,7 +19,7 @@ import (
 
 func init() {
 	register("calibrate", "подобрать порог релевантности на dev+out: таблица «порог → recall dev, пусто на out» (в индекс — только с -write)", runCalibrate)
-	register("matrix", "сравнить режимы поиска base/filter/rewrite/both × K1 × наборы → examples/rag/filter.md (и JSON)", runMatrix)
+	register("matrix", "сравнить режимы поиска base/filter/rewrite/both/hybrid × K1 × наборы → examples/rag/filter.md (и JSON)", runMatrix)
 }
 
 // Отчёты в репозитории.

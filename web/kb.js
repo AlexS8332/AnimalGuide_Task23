@@ -1560,7 +1560,7 @@ function kbCalibGapHTML(d) {
       вне базы (без якоря) до <b>${esc(has(d.out_max) ? kbNum3(d.out_max) : '—')}</b>${d.out_max_id ? ` <span class="hint">${esc(d.out_max_id)}</span>` : ''}
       · доказательство неякорных dev от <b>${esc(has(d.evidence_min) ? kbNum3(d.evidence_min) : '—')}</b>${d.evidence_min_id ? ` <span class="hint">${esc(d.evidence_min_id)}</span>` : ''}
       ${has(d.out_max) && has(d.evidence_min) ? ` · зазор <b>${esc((d.gap >= 0 ? '+' : '') + kbNum3(d.gap))}</b> · запас <b>${esc(kbNum3(d.margin_out))}</b> / <b>${esc(kbNum3(d.margin_dev))}</b>` : ''}</div>
-    <div class="hint">к полу чувствительны (вид в реплике не назван): dev ${ids(d.floor_dev)} · out ${ids(d.floor_out)} · test ${ids(d.floor_test)}</div>
+    <div class="hint">к полу чувствительны (вид в реплике не назван): dev ${ids(d.floor_dev)} · out ${ids(d.floor_out)} · test ${ids(d.floor_test)}${kbList(d.floor_missed).length ? ` · не дошли и без пола (в зазор не входят): ${ids(d.floor_missed)}` : ''}</div>
     ${d.note ? `<div class="kb-tr-note">${esc(d.note)}</div>` : ''}
   </div>`;
 }

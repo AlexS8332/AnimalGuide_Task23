@@ -29,8 +29,9 @@ const CalibStep = 0.005
 //
 //   - сверху — максимум лучшего косинуса у вопросов вне базы (out-of-base
 //     без якоря): выше него пол отсекает их все;
-//   - снизу — минимум косинуса доказательства у неякорных dev-вопросов:
-//     ниже него пол доказательства не трогает.
+//   - снизу — минимум косинуса доказательства у неякорных dev-вопросов,
+//     чьё доказательство доходит до итога фильтра без пола: ниже него пол
+//     доказательства не трогает.
 //
 // Если между ними зазор (минимум доказательства больше максимума out),
 // порог — середина зазора: запас с обеих сторон одинаковый. Если зазора нет —
@@ -98,9 +99,6 @@ func Calibrate(ctx context.Context, p *Pipeline, qs kb.QuestionSet, index string
 					continue
 				}
 				cal.FloorDev = append(cal.FloorDev, q.ID)
-				if c := evidenceCos(t, it.ev); c > 0 && (cal.EvidenceMin < 0 || c < cal.EvidenceMin) {
-					cal.EvidenceMin, cal.EvidenceMinID = round3(c), q.ID
-				}
 			} else {
 				cal.OutN++
 				cal.OutTop = append(cal.OutTop, round3(t.TopDense))
@@ -152,6 +150,28 @@ func Calibrate(ctx context.Context, p *Pipeline, qs kb.QuestionSet, index string
 	}
 	baseHit, _ := apply(-1)
 	cal.Base = ratio(len(baseHit), cal.DevN)
+	// Косинус доказательства — у неякорных dev, чьё доказательство доходит
+	// до итога фильтра без пола (порог 0: относительный порог, повторы и K1
+	// действуют). Не дошло и без пола — пол его не теряет, и в зазор вопрос
+	// не входит (FloorMissed): так продолжение без контекста («а сколько их
+	// всего осталось?» у filter) не тянет порог вниз.
+	noFloor, _ := apply(0)
+	floorDev := map[string]bool{}
+	for _, id := range cal.FloorDev {
+		floorDev[id] = true
+	}
+	for _, it := range items {
+		if !it.dev || !floorDev[it.id] {
+			continue
+		}
+		if !noFloor[it.id] {
+			cal.FloorMissed = append(cal.FloorMissed, it.id)
+			continue
+		}
+		if c := evidenceCos(it.t, it.ev); c > 0 && (cal.EvidenceMin < 0 || c < cal.EvidenceMin) {
+			cal.EvidenceMin, cal.EvidenceMinID = round3(c), it.id
+		}
+	}
 	row := func(th float64) CalibRow {
 		hit, empty := apply(th)
 		r := CalibRow{MinScore: th, DevRecall: ratio(len(hit), cal.DevN), OutEmpty: ratio(empty, cal.OutN)}
@@ -188,7 +208,7 @@ func Calibrate(ctx context.Context, p *Pipeline, qs kb.QuestionSet, index string
 		cal.Rule = CalibMaxDrop
 		cal.Chosen = byDrop
 		if cal.OutMax < 0 || cal.EvidenceMin < 0 {
-			cal.Note = "зазор не определён (нет неякорных вопросов вне базы или неякорных dev с доказательством среди кандидатов) — порог по правилу max-drop"
+			cal.Note = "зазор не определён (нет неякорных вопросов вне базы или неякорных dev, чьё доказательство доходит до итога без пола) — порог по правилу max-drop"
 		} else {
 			cal.Note = fmt.Sprintf("зазора нет: лучший косинус вопроса вне базы %.3f (%s) не ниже косинуса доказательства неякорного dev %.3f (%s) — "+
 				"любой порог или пропустит вопрос вне базы, или отсечёт доказательство; порог по правилу max-drop",
@@ -297,9 +317,12 @@ func (c Calibration) Markdown() string {
 		b.WriteString("- вопросов вне базы без якоря нет;\n")
 	}
 	if c.EvidenceMin >= 0 {
-		fmt.Fprintf(&b, "- минимум косинуса доказательства у неякорных dev: %.3f (%s);\n", c.EvidenceMin, c.EvidenceMinID)
+		fmt.Fprintf(&b, "- минимум косинуса доказательства у неякорных dev, чьё доказательство доходит до итога без пола: %.3f (%s);\n", c.EvidenceMin, c.EvidenceMinID)
 	} else {
-		b.WriteString("- неякорных dev с доказательством среди кандидатов нет;\n")
+		b.WriteString("- неякорных dev, чьё доказательство доходит до итога без пола, нет;\n")
+	}
+	if len(c.FloorMissed) > 0 {
+		fmt.Fprintf(&b, "- не дошли до итога и без пола (пол их не теряет, в зазор не входят): %s;\n", strings.Join(c.FloorMissed, ", "))
 	}
 	if c.OutMax >= 0 && c.EvidenceMin >= 0 {
 		fmt.Fprintf(&b, "- зазор %+.3f; порог %.3f; запас до вопросов вне базы %+.3f, до доказательств %+.3f.\n", c.Gap, c.Chosen, c.MarginOut, c.MarginDev)
