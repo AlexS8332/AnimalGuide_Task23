@@ -146,7 +146,7 @@ func TestRunMatrixAndCalibrate(t *testing.T) {
 func TestConclude(t *testing.T) {
 	q := func(id string, after int, empty, un bool) MatrixQ {
 		return MatrixQ{ID: id, Type: "fact", RankBefor: max(after, 1), RankAfter: after, Kept: 3, Empty: empty,
-			Answerable: !un, Unanswerable: un}
+			Answerable: !un, Unanswerable: un, Cut: after == 0 && !un}
 	}
 	m := Matrix{Configs: []Named{{Name: "base"}, {Name: "filter", Config: Config{Filter: true}}, {Name: "rewrite", Config: Config{Rewrite: RewriteCode}}}}
 	m.Rows = []MatrixRow{
@@ -161,7 +161,7 @@ func TestConclude(t *testing.T) {
 	for _, want := range []string{
 		"K1 = 5, dev+test, 2 вопросов с доказательством: доказательство в итоговой выдаче — base 1, filter 0 (−D1), rewrite 2 (+D2).",
 		"Неотвечаемые (out и answerable=false, 1): пусто после фильтра — base 0, filter 1, rewrite 0 из 1.",
-		"filter: фильтр отсёк в среднем 75 % кандидатов; потеряно доказательство, которое base показывал: D1 (ранг до 1).",
+		"filter: фильтр отсёк в среднем 75 % кандидатов; фильтр отсёк доказательство, которое base показывал: D1 (ранг до 1).",
 		"Выборка мала",
 	} {
 		if !strings.Contains(got, want) {

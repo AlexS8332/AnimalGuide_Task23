@@ -230,6 +230,7 @@ func RunMatrix(ctx context.Context, p *Pipeline, qs kb.QuestionSet, configs []Na
 					finish(&tt)
 					a := accs[key(nc.Name, sp, k1)]
 					row, relHits, cut := measure(q, e, tt)
+					row.Cut = wrongCut(e, tt, row)
 					a.row.Rows = append(a.row.Rows, row)
 					a.questions++
 					a.ms += ms
@@ -251,7 +252,7 @@ func RunMatrix(ctx context.Context, p *Pipeline, qs kb.QuestionSet, configs []Na
 						}
 						a.relHits += relHits
 						a.hits += len(tt.Hits)
-						if wrongCut(e, tt, row) {
+						if row.Cut {
 							a.wrong++
 						}
 					}
@@ -435,11 +436,15 @@ func conclude(m Matrix, k1s []int) []string {
 			continue
 		}
 		rows := m.questionsOf(nc.Name, k1, answerSplits...)
-		var wrong []string
+		var wrong, beyond []string
 		for _, r := range rows {
 			if r.Answerable && r.RankBefor > 0 && r.RankAfter == 0 {
 				if b := findQ(base, r.ID); b != nil && b.RankAfter > 0 {
-					wrong = append(wrong, fmt.Sprintf("%s (ранг до %d)", r.ID, r.RankBefor))
+					if r.Cut {
+						wrong = append(wrong, fmt.Sprintf("%s (ранг до %d)", r.ID, r.RankBefor))
+					} else {
+						beyond = append(beyond, fmt.Sprintf("%s (ранг %d)", r.ID, r.RankBefor))
+					}
 				}
 			}
 		}
@@ -453,9 +458,12 @@ func conclude(m Matrix, k1s []int) []string {
 		}
 		line := fmt.Sprintf("%s: фильтр отсёк в среднем %.0f %% кандидатов", nc.Name, 100*cut/math.Max(float64(cn), 1))
 		if len(wrong) > 0 {
-			line += "; потеряно доказательство, которое base показывал: " + strings.Join(wrong, ", ")
+			line += "; фильтр отсёк доказательство, которое base показывал: " + strings.Join(wrong, ", ")
 		} else {
-			line += "; доказательств, которые base показывал, не потеряно"
+			line += "; доказательств, которые base показывал, фильтр не отсёк"
+		}
+		if len(beyond) > 0 {
+			line += "; ушло за K1 после реранкинга: " + strings.Join(beyond, ", ")
 		}
 		out = append(out, line+".")
 	}
@@ -522,7 +530,7 @@ func (m Matrix) Markdown() string {
 			continue
 		}
 		fmt.Fprintf(&b, "\n## Вопросы %s (K1 = %d)\n\n", sp, k1)
-		b.WriteString("Ранг доказательства: «до → после» (до — среди кандидатов после реранкинга, после — в итоге; «—» — нет); " +
+		b.WriteString("Ранг доказательства: «до → после» (до — среди кандидатов после реранкинга, после — в итоге; «—» — нет; «отсечено» — релевантный кандидат снят фильтром, а не K1); " +
 			"«пусто» — фильтр отсёк всё. Переписанный запрос — первой конфигурации с переписыванием.\n\n")
 		b.WriteString("| id | тип |")
 		for _, nc := range m.Configs {
@@ -565,6 +573,9 @@ func rankCell(q MatrixQ) string {
 		s = r(q.RankBefor) + " → " + r(q.RankAfter)
 	} else {
 		s = fmt.Sprintf("оставлено %d", q.Kept)
+	}
+	if q.Cut {
+		s += ", отсечено"
 	}
 	if q.Empty {
 		s += ", пусто"

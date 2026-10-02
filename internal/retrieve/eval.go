@@ -54,6 +54,9 @@ type MatrixQ struct {
 	Answerable bool `json:"answerable"`
 	// Unanswerable — вопрос без ответа в базе (out и answerable=false).
 	Unanswerable bool `json:"unanswerable,omitempty"`
+	// Cut — доказательство было среди кандидатов, а в итог не попало,
+	// потому что релевантный кандидат отсечён фильтром (не K1).
+	Cut bool `json:"cut,omitempty"`
 }
 
 // Matrix — сравнение конфигураций на наборах и при разных K1 (без модели,
