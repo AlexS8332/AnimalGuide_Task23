@@ -19,6 +19,17 @@
 // ask и evals платные (модель): 503, если у приложения нет модели (Answerer
 // == nil); 409 — прогон уже идёт (в теле id идущего), одновременно один.
 //
+// v23 — второй этап поиска (internal/retrieve):
+//
+//	GET /api/kb/search?…&rewrite=&rerank=&filter=&k0=&context= — поиск через
+//	    конвейер: один индекс (пусто — structure), в SearchResult.Trace —
+//	    кандидаты K0 с баллами всех стадий и причинами отсечения
+//	GET /api/kb/matrix       retrieve.Matrix — последняя матрица режимов (файл; 404 — нет)
+//	GET /api/kb/calibration  retrieve.Calibration — последняя калибровка порога (файл; 404 — нет)
+//
+// Режимы ask и evals — norag, rag, rag+filter, rag+rewrite, rag+both; ask —
+// до трёх режимов рядом. rewrite=llm и rerank=llm платные: 503 без модели.
+//
 // Коды: 400 — неверный запрос; 404 — нет документа, индекса или отчёта;
 // 405 — не тот метод; 503 — базы нет (в теле why и hint: как её собрать).
 // Всё, что пришло из корпуса, интерфейс выводит как данные (esc), а не
@@ -34,6 +45,7 @@ import (
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/embed"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/kb"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/rag"
+	"github.com/AlexS8332/AnimalGuide_Task23/internal/retrieve"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/server"
 )
 
@@ -67,6 +79,19 @@ type API struct {
 	Rule RuleFunc
 	Eval EvalFunc
 
+	// Pipeline — второй этап поиска (v23) для search с параметрами
+	// конвейера; nil — такой поиск выключен (503), если не задан Retrieve.
+	// Платные режимы (rewrite=llm, rerank=llm) — только при Pipeline.LLM.
+	Pipeline *retrieve.Pipeline
+	// Retrieve — чем искать через конвейер; nil — Pipeline.Search.
+	// Подменяется в тестах и на стенде проверок интерфейса.
+	Retrieve RetrieveFunc
+	// MatrixPath, CalibrationPath — файлы последней матрицы режимов и
+	// калибровки (kb matrix, kb calibrate); пусто — DefaultMatrixPath и
+	// DefaultCalibrationPath.
+	MatrixPath      string
+	CalibrationPath string
+
 	// mu охраняет прогоны evals: Progress приходит из горутины прогона,
 	// GET — из обработчиков.
 	mu    sync.Mutex
@@ -82,6 +107,9 @@ type RuleFunc func(q kb.Question, answer string) rag.RuleResult
 
 // EvalFunc — прогон контрольных вопросов (как rag.Eval над Answerer).
 type EvalFunc func(ctx context.Context, qs kb.QuestionSet, o rag.EvalOptions) (rag.Report, error)
+
+// RetrieveFunc — поиск через конвейер (как Pipeline.Search).
+type RetrieveFunc func(ctx context.Context, q retrieve.Query, c retrieve.Config) (retrieve.Trace, error)
 
 // InfoView — GET info.
 type InfoView struct {
@@ -117,6 +145,9 @@ type SearchResult struct {
 	Info  kb.SearchInfo `json:"info"`
 	Hits  []kb.Hit      `json:"hits"`
 	Error string        `json:"error,omitempty"`
+	// Trace — путь поиска через конвейер (v23): кандидаты до фильтра и
+	// после; nil — прямой поиск.
+	Trace *retrieve.Trace `json:"trace,omitempty"`
 }
 
 // Extension — раздел для server.New.
@@ -124,7 +155,7 @@ func (a *API) Extension() []server.Extension {
 	return []server.Extension{{Prefix: Prefix, Handler: http.HandlerFunc(a.handle)}}
 }
 
-// AskRequest — POST ask. Modes пусто — оба режима.
+// AskRequest — POST ask. Modes пусто — norag и rag; не больше maxAskModes.
 type AskRequest struct {
 	Q       string     `json:"q"`
 	Context []string   `json:"context,omitempty"`

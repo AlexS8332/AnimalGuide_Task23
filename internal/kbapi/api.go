@@ -55,6 +55,17 @@ func (a *API) handle(w http.ResponseWriter, r *http.Request) {
 			a.listEvals(w)
 		}
 		return
+	case path == "matrix", path == "calibration":
+		// v23: файлы последних прогонов kb matrix и kb calibrate — видны и
+		// без базы.
+		if method(w, r, http.MethodGet) {
+			if path == "matrix" {
+				a.matrix(w)
+			} else {
+				a.calibration(w)
+			}
+		}
+		return
 	case strings.HasPrefix(path, "evals/"):
 		id := strings.TrimPrefix(path, "evals/")
 		if r.Method == http.MethodDelete {
@@ -268,6 +279,11 @@ func (a *API) search(w http.ResponseWriter, r *http.Request) {
 	mode := kb.Mode(strings.TrimSpace(q.Get("mode")))
 	if mode != "" && mode != kb.Dense && mode != kb.BM25 {
 		server.WriteError(w, http.StatusBadRequest, "режим поиска — dense или bm25: "+string(mode))
+		return
+	}
+	// v23: параметры конвейера — поиск в два этапа по одному индексу.
+	if pipelineParams(q) {
+		a.searchPipeline(w, r, query, k)
 		return
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)

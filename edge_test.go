@@ -299,6 +299,9 @@ func TestEdge(t *testing.T) {
 		{"kb-none", a.main},
 		{"kb-ask", a.main},
 		{"kb-qa", a.main},
+		{"kb-trace", a.main},
+		{"kb-modes", a.main},
+		{"kb-nofiles", a.main},
 	}
 	total := 0
 	for _, sc := range scenarios {
@@ -364,6 +367,11 @@ func TestEdge(t *testing.T) {
 			{"kb-ask.png", "shot-kb-ask", a.main},
 			{"kb-qa.png", "shot-kb-qa", a.main},
 			{"kb-qa-summary.png", "shot-kb-qa-summary", a.main},
+			{"kb-trace.png", "shot-kb-trace", a.main},
+			{"kb-trace-empty.png", "shot-kb-trace-empty", a.main},
+			{"kb-modes.png", "shot-kb-modes", a.main},
+			{"kb-calib.png", "shot-kb-calib", a.main},
+			{"kb-ask-modes.png", "shot-kb-ask-modes", a.main},
 		} {
 			edgeRun(t, edge, fmt.Sprintf("%s/?scenario=%s#c=%s", shot.URL, s.scenario, s.conv), "1400,900",
 				"--screenshot="+filepath.Join(abs, s.file))

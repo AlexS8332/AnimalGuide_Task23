@@ -24,6 +24,7 @@ import (
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/persona"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/profile"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/rag"
+	"github.com/AlexS8332/AnimalGuide_Task23/internal/retrieve"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/runs"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/store"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/tools"
@@ -107,7 +108,11 @@ func wire(o options, registry *features.Registry, defaults features.Set, runner 
 	// инструментов: сравнение «с базой / без базы» идёт на них, а не на
 	// ведущем с живыми источниками.
 	if know.api.Searcher != nil {
-		know.api.Answerer = &rag.Answerer{LLM: runner.LLM, Model: runner.Model, Searcher: know.api.Searcher}
+		// Второй этап поиска (v23): общий у вкладки «Поиск» и режимов
+		// rag+filter, rag+rewrite, rag+both.
+		pipe := &retrieve.Pipeline{Searcher: know.api.Searcher, LLM: runner.LLM, Model: runner.Model}
+		know.api.Pipeline = pipe
+		know.api.Answerer = &rag.Answerer{LLM: runner.LLM, Model: runner.Model, Searcher: know.api.Searcher, Pipeline: pipe}
 		know.api.Judge = &rag.Judge{LLM: runner.LLM, Model: runner.Model}
 	}
 	know.api.Questions = o.kbQuestions()

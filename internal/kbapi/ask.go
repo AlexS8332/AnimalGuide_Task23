@@ -20,8 +20,11 @@ import (
 )
 
 const (
-	// askTimeout — предел одного ask: два запроса к модели идут параллельно.
+	// askTimeout — предел одного ask: запросы режимов к модели идут
+	// параллельно.
 	askTimeout = 3 * time.Minute
+	// maxAskModes — предел режимов одного ask: колонки ответов рядом.
+	maxAskModes = 3
 	// evalTimeout — предел прогона контрольных вопросов.
 	evalTimeout = 60 * time.Minute
 	// maxQ — предел длины вопроса (и реплики контекста) в символах.
@@ -129,15 +132,38 @@ func (a *API) noModel(w http.ResponseWriter) {
 	server.WriteJSON(w, http.StatusServiceUnavailable, map[string]string{"error": why, "why": why, "hint": HintNoModel})
 }
 
-// modes — режимы запроса: пусто — оба; неизвестный или повтор — ошибка.
+// allModes — режимы ответа (v23: плюс три режима с конвейером retrieve).
+var allModes = []rag.Mode{rag.NoRAG, rag.RAG, rag.RAGFilter, rag.RAGRewrite, rag.RAGBoth}
+
+// validMode — режим из allModes.
+func validMode(m rag.Mode) bool {
+	for _, x := range allModes {
+		if x == m {
+			return true
+		}
+	}
+	return false
+}
+
+// modeNames — режимы через запятую для сообщений об ошибке.
+func modeNames() string {
+	s := make([]string, len(allModes))
+	for i, m := range allModes {
+		s[i] = string(m)
+	}
+	return strings.Join(s, ", ")
+}
+
+// modes — режимы запроса: пусто — norag и rag; неизвестный или повтор —
+// ошибка.
 func modes(in []rag.Mode) ([]rag.Mode, error) {
 	if len(in) == 0 {
 		return []rag.Mode{rag.NoRAG, rag.RAG}, nil
 	}
 	var out []rag.Mode
 	for _, m := range in {
-		if m != rag.NoRAG && m != rag.RAG {
-			return nil, errors.New("режим — norag или rag: " + string(m))
+		if !validMode(m) {
+			return nil, errors.New("режим — один из " + modeNames() + ": " + string(m))
 		}
 		for _, x := range out {
 			if x == m {
@@ -217,6 +243,10 @@ func (a *API) ask(w http.ResponseWriter, r *http.Request) {
 		server.WriteError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	if len(ms) > maxAskModes {
+		server.WriteError(w, http.StatusBadRequest, "режимов больше "+strconv.Itoa(maxAskModes)+": рядом помещается не больше трёх ответов")
+		return
+	}
 	var question *kb.Question
 	note := ""
 	if id := strings.TrimSpace(in.QuestionID); id != "" {
@@ -279,7 +309,7 @@ func (a *API) ask(w http.ResponseWriter, r *http.Request) {
 		if question != nil {
 			res := a.ruleFn()(*question, answers[i].Text)
 			v.Rows = append(v.Rows, rag.Run{Repeat: 1, Answer: answers[i], Rule: res, Final: res.Verdict,
-				Recall: m == rag.RAG && a.recall(ctx, *question, answers[i].Hits)})
+				Recall: m.UsesBase() && a.recall(ctx, *question, answers[i].Hits)})
 		}
 	}
 	v.Error = strings.Join(msgs, "; ")
