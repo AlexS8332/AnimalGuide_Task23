@@ -71,6 +71,7 @@ func runQA(ctx context.Context, args []string, out, errOut io.Writer) int {
 		o.Judge = &rag.Judge{LLM: a.LLM, Model: a.Model}
 	}
 	fmt.Fprintf(errOut, "kb qa: модель %s, наборы %s, режимы %s, повторов %d, судья %v\n", a.Model, strings.Join(sp, ","), *modes, *repeat, *judge)
+	printThresholds(ctx, a, ms, errOut)
 	r, err := rag.Eval(ctx, a, qs, o)
 	if err != nil {
 		fmt.Fprintln(errOut, "ошибка:", err)
@@ -135,4 +136,24 @@ func orDash(s string) string {
 		return "—"
 	}
 	return s
+}
+
+// printThresholds — фактический порог фильтра у режимов с фильтром и откуда
+// он: настройки, индекс (kb calibrate -write) или умолчание.
+func printThresholds(ctx context.Context, a *rag.Answerer, ms []rag.Mode, out io.Writer) {
+	for _, m := range ms {
+		if !m.Pipelined() || a.Pipeline == nil {
+			continue
+		}
+		c := a.Config(m)
+		if !c.Filter {
+			continue
+		}
+		v, from, err := a.Pipeline.MinScore(ctx, c)
+		if err != nil {
+			fmt.Fprintf(out, "kb qa: %s — порог не определён: %v\n", m, err)
+			continue
+		}
+		fmt.Fprintf(out, "kb qa: %s — порог %.3f (%s)\n", m, v, from)
+	}
 }

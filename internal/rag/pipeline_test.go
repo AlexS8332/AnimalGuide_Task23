@@ -148,6 +148,17 @@ func TestPipelineRanks(t *testing.T) {
 // называет механизмы.
 func TestHookPipeline(t *testing.T) {
 	h := &Hook{Searcher: searcher(t), K: 3}
+	// Порог — из индекса (как после kb calibrate -write): хэш-эмбеддер даёт
+	// косинусы ниже умолчания, а вид у продолжения унаследован — якоря нет,
+	// пол действует.
+	ctx := context.Background()
+	if err := h.Searcher.Store.SetMinScore(ctx, DefaultIndex, 0.05); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { h.Searcher.Store.SetMinScore(ctx, DefaultIndex, 0) })
+	if v, from, err := h.pipeline().MinScore(ctx, ModeConfig(RAGBoth)); err != nil || v != 0.05 || from != retrieve.MinScoreIndex {
+		t.Fatalf("порог хука: %v %q %v", v, from, err)
+	}
 	tr, rec := hookTurn(t, "+rag,+rag.filter,+rag.rewrite", "А сколько она весит?")
 	tr.Request.Window = []llm.Message{
 		{Role: llm.RoleUser, Content: "Расскажи про манула"},
@@ -182,7 +193,7 @@ func TestHookPipeline(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &res); err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(res.Rewritten, "харза Martes flavigula") || res.Query != "А сколько она весит?" || len(res.Hits) == 0 ||
+	if res.Rewritten != "Где в России водится харза? А сколько она весит?" || res.Query != "А сколько она весит?" || len(res.Hits) == 0 ||
 		len(res.Hits) > 3 || res.Hits[0].ChunkID == "" {
 		t.Fatalf("выдача: %+v", res)
 	}

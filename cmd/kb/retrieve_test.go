@@ -21,8 +21,8 @@ func TestSearchPipeline(t *testing.T) {
 	if code != exitOK {
 		t.Fatalf("search: %d\n%s\n%s", code, out, errOut)
 	}
-	for _, want := range []string{"[structure] rewrite code, filter; режим dense, hash-256", "запрос: Сколько часов в день кошачий медведь тратит на еду? малая панда Ailurus fulgens",
-		"раскрыто: кошачий медведь → малая панда", "порог 0.800, лучший косинус", "кандидатов ", "кандидаты (по порядку после реранкинга):", "✗ ", " 1. "} {
+	for _, want := range []string{"[structure] rewrite code, filter; режим dense, hash-256", "запрос: Сколько часов в день кошачий медведь тратит на еду? малая панда\n", "в BM25: Сколько часов в день кошачий медведь тратит на еду? малая панда Ailurus fulgens",
+		"раскрыто: кошачий медведь → малая панда", "порог 0.800 (умолчание) не применяется: вид назван в запросе (малая панда), лучший косинус", "отрыв от второго", "кандидатов ", "кандидаты (по порядку после реранкинга):", "✗ ", " 1. "} {
 		if !strings.Contains(out, want) {
 			t.Errorf("нет %q в\n%s", want, out)
 		}
@@ -131,14 +131,15 @@ func TestQAPipelined(t *testing.T) {
 	dir := t.TempDir()
 	code, out, errOut := runKB("qa", "-db", db, "-embedder", "hash", "-questions", "../../eval/questions.json",
 		"-modes", "norag,rag,rag+filter,rag+rewrite,rag+both", "-judge=false", "-out", filepath.Join(dir, "qa.md"))
-	if code != exitOK {
+	if code != exitOK || !strings.Contains(errOut, "kb qa: rag+filter — порог 0.800 (умолчание)") || !strings.Contains(errOut, "kb qa: rag+both — порог 0.800 (умолчание)") ||
+		strings.Contains(errOut, "rag+rewrite — порог") {
 		t.Fatalf("qa: %d\n%s\n%s", code, out, errOut)
 	}
 	if f.count() != 50 || !strings.Contains(errOut, "T07 synonym: norag abstain, rag wrong, rag+filter wrong, rag+rewrite wrong, rag+both wrong") || !strings.Contains(out, "Доказательство в выдаче rag+rewrite") {
 		t.Fatalf("qa: %d запросов\n%s\n%s", f.count(), out, errOut)
 	}
 	code, out, _ = runKB("ask", "-db", db, "-embedder", "hash", "-mode", "rag+rewrite", "Что ест кошачий медведь?")
-	if code != exitOK || !strings.Contains(out, "== rag+rewrite ==") || !strings.Contains(out, "Запрос в поиск: Что ест кошачий медведь? малая панда Ailurus fulgens") {
+	if code != exitOK || !strings.Contains(out, "== rag+rewrite ==") || !strings.Contains(out, "Запрос в поиск: Что ест кошачий медведь? малая панда\n") {
 		t.Fatalf("ask rag+rewrite: %d\n%s", code, out)
 	}
 }
