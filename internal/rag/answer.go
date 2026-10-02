@@ -9,6 +9,7 @@ import (
 
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/kb"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/llm"
+	"github.com/AlexS8332/AnimalGuide_Task23/internal/retrieve"
 )
 
 // answerSystem — системный промпт отвечающего агента, ОБЩИЙ для обоих
@@ -26,8 +27,10 @@ const answerSystem = `Ты — справочник о животных. Отв�
 const ragRule = `К вопросу приложены фрагменты базы знаний справочника. Опирайся только на них, а не на свою память: если фрагменты расходятся с тем, что ты помнишь, верны фрагменты. Называй источники — chunk_id фрагментов в квадратных скобках, например [manul/structure/004]. Если во фрагментах ответа нет — так и скажи: «в базе знаний этого нет», и не дополняй ответ по памяти.`
 
 // System — системный промпт режима (для вкладки и тестов).
+// Режимы v23 (rag+filter, rag+rewrite, rag+both) — тот же промпт, что у
+// rag: отличаются только фрагменты.
 func System(mode Mode) string {
-	if mode == RAG {
+	if mode.UsesBase() {
 		return answerSystem + "\n\n" + ragRule
 	}
 	return answerSystem
@@ -81,14 +84,28 @@ func (a *Answerer) Answer(ctx context.Context, q Question, mode Mode) (Answer, e
 	if strings.TrimSpace(q.Text) == "" {
 		return Answer{}, errors.New("пустой вопрос")
 	}
-	if mode != NoRAG && mode != RAG {
-		return Answer{}, fmt.Errorf("неизвестный режим %q (norag, rag)", mode)
+	if !mode.Known() {
+		return Answer{}, fmt.Errorf("неизвестный режим %q (%s)", mode, modeList())
 	}
 	if a == nil || a.LLM == nil {
 		return Answer{}, errors.New("отвечающему агенту не передана модель")
 	}
 	out := Answer{Mode: mode, System: System(mode), User: q.UserText()}
-	if mode == RAG {
+	switch {
+	case mode.Pipelined():
+		if a.Pipeline == nil {
+			return Answer{}, fmt.Errorf("режим %s без конвейера поиска (Answerer.Pipeline)", mode)
+		}
+		t, err := a.Pipeline.Search(ctx, retrieve.Query{Text: q.Text, Context: q.Context}, a.Config(mode))
+		if err != nil {
+			return Answer{}, fmt.Errorf("поиск по базе знаний (%s): %w", mode, err)
+		}
+		out.Trace = &t
+		out.Hits, out.Search = t.Hits, t.Info
+		// Пустой итог фильтра — та же явная строка «ничего не найдено»,
+		// что у пустой выдачи: модель должна сказать «в базе этого нет».
+		out.User += "\n\n" + Compose(t.Hits)
+	case mode == RAG:
 		if a.Searcher == nil {
 			return Answer{}, errors.New("режим rag без базы знаний: соберите её командой kb index")
 		}
@@ -110,7 +127,60 @@ func (a *Answerer) Answer(ctx context.Context, q Question, mode Mode) (Answer, e
 	out.Text = strings.TrimSpace(resp.Message.Content)
 	out.Usage = resp.Usage
 	out.Cost = llm.PriceOf(a.model(), resp.Usage, a.now())
+	if out.Trace != nil && out.Trace.Usage.Total > 0 {
+		// Платные шаги конвейера (переписывание, реранкинг моделью) — в цене
+		// ответа: режим платит за них, и сравнение цены режимов честное.
+		out.Usage = out.Usage.Add(out.Trace.Usage)
+		out.Cost = out.Cost.Add(out.Trace.Cost)
+	}
 	return out, nil
+}
+
+// Config — настройки конвейера режима: ModeConfig, поверх — заданные
+// в Configs поля (ненулевые; Filter включается, но не выключается), индекс
+// и k отвечающего агента, если их не задали.
+func (a *Answerer) Config(m Mode) retrieve.Config {
+	c := ModeConfig(m)
+	if o, ok := a.Configs[m]; ok {
+		if o.Index != "" {
+			c.Index = o.Index
+		}
+		if o.K0 > 0 {
+			c.K0 = o.K0
+		}
+		if o.K1 > 0 {
+			c.K1 = o.K1
+		}
+		if o.Rewrite != "" {
+			c.Rewrite = o.Rewrite
+		}
+		if o.Rerank != "" {
+			c.Rerank = o.Rerank
+		}
+		if o.MinScore > 0 {
+			c.MinScore = o.MinScore
+		}
+		if o.Delta > 0 {
+			c.Delta = o.Delta
+		}
+		c.Filter = c.Filter || o.Filter
+	}
+	if c.Index == "" {
+		c.Index = a.index()
+	}
+	if c.K1 == 0 {
+		c.K1 = a.k()
+	}
+	return c
+}
+
+// modeList — «norag, rag, rag+filter, …» для сообщений об ошибке.
+func modeList() string {
+	parts := make([]string, len(Modes))
+	for i, m := range Modes {
+		parts[i] = string(m)
+	}
+	return strings.Join(parts, ", ")
 }
 
 func (a *Answerer) index() string { return orIndex(a.Index) }

@@ -12,6 +12,7 @@ import (
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/kb"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/llm"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/rag"
+	"github.com/AlexS8332/AnimalGuide_Task23/internal/retrieve"
 )
 
 // Общее у команд, которые зовут модель (ask, qa, probe): ключ и модель из
@@ -42,7 +43,7 @@ type answerFlags struct {
 func newAnswerFlags(fs *flag.FlagSet) answerFlags {
 	return answerFlags{
 		db:    dbFlag(fs),
-		index: fs.String("index", rag.DefaultIndex, "индекс поиска для режима rag: structure или fixed"),
+		index: fs.String("index", rag.DefaultIndex, "индекс поиска для режимов с базой: structure или fixed"),
 		k:     fs.Int("k", rag.DefaultK, "сколько фрагментов приложить к вопросу в режиме rag (до 10)"),
 		emb:   embedderFlag(fs),
 	}
@@ -82,6 +83,9 @@ func (f answerFlags) answerer(ctx context.Context, needKB bool, errOut io.Writer
 		return nil, closeKB, exitUsage
 	}
 	a.Searcher = &kb.Searcher{Store: st, Embedder: emb}
+	// Конвейер режимов v23 (rag+filter, rag+rewrite, rag+both): бесплатные
+	// шаги, модель ему не нужна — платные строки только в kb matrix -paid.
+	a.Pipeline = &retrieve.Pipeline{Searcher: a.Searcher, Model: model}
 	return a, func() { st.Close() }, -1
 }
 
@@ -94,12 +98,11 @@ func parseModes(s string) ([]rag.Mode, error) {
 	seen := map[rag.Mode]bool{}
 	for _, p := range strings.Split(s, ",") {
 		m := rag.Mode(strings.TrimSpace(p))
-		switch m {
-		case "":
+		switch {
+		case m == "":
 			continue
-		case rag.NoRAG, rag.RAG:
-		default:
-			return nil, fmt.Errorf("неизвестный режим %q (norag, rag, both)", m)
+		case !m.Known():
+			return nil, fmt.Errorf("неизвестный режим %q (norag, rag, rag+filter, rag+rewrite, rag+both; both — norag и rag)", m)
 		}
 		if !seen[m] {
 			seen[m] = true
@@ -112,9 +115,10 @@ func parseModes(s string) ([]rag.Mode, error) {
 	return out, nil
 }
 
-func hasMode(ms []rag.Mode, m rag.Mode) bool {
-	for _, x := range ms {
-		if x == m {
+// needsKB — нужна ли база хоть одному режиму.
+func needsKB(ms []rag.Mode) bool {
+	for _, m := range ms {
+		if m.UsesBase() {
 			return true
 		}
 	}

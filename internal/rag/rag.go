@@ -104,8 +104,33 @@ type Answerer struct {
 	Configs  map[Mode]retrieve.Config
 }
 
-// ModeConfig — настройки конвейера по умолчанию для режима v23.
-func ModeConfig(m Mode) retrieve.Config { return retrieve.Config{} }
+// ModeConfig — настройки конвейера по умолчанию для режима v23: filter —
+// только фильтр, rewrite — только переписывание кодом, both — переписывание,
+// гибридный реранкинг и фильтр. У остальных режимов — пустые.
+func ModeConfig(m Mode) retrieve.Config {
+	switch m {
+	case RAGFilter:
+		return retrieve.Config{Filter: true}
+	case RAGRewrite:
+		return retrieve.Config{Rewrite: retrieve.RewriteCode}
+	case RAGBoth:
+		return retrieve.Config{Rewrite: retrieve.RewriteCode, Rerank: retrieve.RerankHybrid, Filter: true}
+	}
+	return retrieve.Config{}
+}
+
+// Modes — все режимы ответа по порядку (для разбора флагов).
+var Modes = []Mode{NoRAG, RAG, RAGFilter, RAGRewrite, RAGBoth}
+
+// Known — режим известен.
+func (m Mode) Known() bool {
+	for _, x := range Modes {
+		if x == m {
+			return true
+		}
+	}
+	return false
+}
 
 // Verdict — оценка ответа.
 type Verdict string
