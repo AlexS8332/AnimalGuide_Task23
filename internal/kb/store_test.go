@@ -402,3 +402,66 @@ func TestBM25PerIndex(t *testing.T) {
 		t.Fatalf("fixed после миграции: %v", err)
 	}
 }
+
+// TestScoreAndMinScore — косинус для заданных чанков совпадает с баллом
+// dense-выдачи; порог индекса пишется, проверяется и сбрасывается
+// пересборкой (v23).
+func TestScoreAndMinScore(t *testing.T) {
+	ctx := context.Background()
+	st := miniStore(t)
+	if _, err := st.Build(ctx, NewStructure(300, 80), embed.Hash{}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.Build(ctx, NewFixed(200, 30), nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	s := &Searcher{Store: st, Embedder: embed.Hash{}}
+	q := "чем кормится манул"
+	hits, _, err := s.Search(ctx, q, SearchOptions{Index: "structure", K: 3})
+	if err != nil || len(hits) != 3 {
+		t.Fatalf("поиск: %v %d", err, len(hits))
+	}
+	ids := []string{hits[0].ID, hits[2].ID, "nope/structure/000"}
+	got, err := s.Score(ctx, "structure", q, ids)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 2 || got[hits[0].ID] != hits[0].Score || got[hits[2].ID] != hits[2].Score {
+		t.Fatalf("Score: %v, ждали %v и %v", got, hits[0].Score, hits[2].Score)
+	}
+	if got, err := s.Score(ctx, "structure", q, nil); err != nil || len(got) != 0 {
+		t.Fatalf("пустой список: %v %v", got, err)
+	}
+	for _, c := range []struct {
+		s     *Searcher
+		index string
+	}{{s, "fixed"}, {&Searcher{Store: st}, "structure"}, {&Searcher{Store: st, Embedder: embed.Hash{D: 64}}, "structure"}, {s, "nope"}} {
+		if _, err := c.s.Score(ctx, c.index, q, ids); err == nil {
+			t.Fatalf("Score без векторов (%s) без ошибки", c.index)
+		}
+	}
+
+	if err := st.SetMinScore(ctx, "structure", 0.815); err != nil {
+		t.Fatal(err)
+	}
+	if ix, _ := st.Index(ctx, "structure"); ix.MinScore != 0.815 {
+		t.Fatalf("порог не записан: %v", ix.MinScore)
+	}
+	if ix, _ := st.Index(ctx, "fixed"); ix.MinScore != 0 {
+		t.Fatalf("порог задел чужой индекс: %v", ix.MinScore)
+	}
+	if err := st.SetMinScore(ctx, "nope", 0.8); !errors.Is(err, ErrNoIndex) {
+		t.Fatalf("нет индекса: %v", err)
+	}
+	for _, bad := range []float64{-0.1, 1, 1.5} {
+		if err := st.SetMinScore(ctx, "structure", bad); err == nil {
+			t.Fatalf("порог %v принят", bad)
+		}
+	}
+	if _, err := st.Build(ctx, NewStructure(300, 80), embed.Hash{}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if ix, _ := st.Index(ctx, "structure"); ix.MinScore != 0 {
+		t.Fatalf("пересборка не сбросила порог: %v", ix.MinScore)
+	}
+}

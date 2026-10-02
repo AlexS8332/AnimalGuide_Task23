@@ -85,6 +85,36 @@ func (s *Searcher) searchDense(ctx context.Context, idx IndexInfo, query string,
 	if err != nil {
 		return nil, err
 	}
+	q, err := s.queryVec(ctx, idx, query)
+	if err != nil {
+		return nil, err
+	}
+	type scored struct {
+		i int
+		s float32
+	}
+	all := make([]scored, 0, len(di.vecs))
+	for i, v := range di.vecs {
+		if v == nil {
+			continue
+		}
+		all = append(all, scored{i, embed.Dot(q, v)})
+	}
+	// Стабильная сортировка с разбором ничьих по порядку чанков:
+	// одинаковый вопрос — одинаковая выдача.
+	sort.SliceStable(all, func(a, b int) bool { return all[a].s > all[b].s })
+	if len(all) > k {
+		all = all[:k]
+	}
+	hits := make([]Hit, 0, len(all))
+	for r, x := range all {
+		hits = append(hits, Hit{Chunk: di.chunks[x.i], Score: float64(x.s), Rank: r + 1})
+	}
+	return hits, nil
+}
+
+// queryVec — вектор вопроса через кэш kb_embed_cache.
+func (s *Searcher) queryVec(ctx context.Context, idx IndexInfo, query string) ([]float32, error) {
 	var e embed.Embedder = s.Embedder
 	if _, ok := e.(*embed.Cached); !ok {
 		// Свой Cached на вызов: счётчики Cached не потокобезопасны.
@@ -100,28 +130,53 @@ func (s *Searcher) searchDense(ctx context.Context, idx IndexInfo, query string,
 	if len(qv[0]) != idx.Dims {
 		return nil, fmt.Errorf("вектор вопроса размерности %d, у индекса %d", len(qv[0]), idx.Dims)
 	}
-	type scored struct {
-		i int
-		s float32
+	return qv[0], nil
+}
+
+// Score — косинус запроса с заданными чанками индекса (v23, добавление).
+// Нужен второму этапу поиска (internal/retrieve): кандидат, которого нашёл
+// только BM25, не имеет косинуса в dense-выдаче, а фильтр релевантности
+// судит всех кандидатов одной шкалой. Перебор не нужен — только скалярные
+// произведения с векторами из того же кэша в памяти, что у Search.
+//
+// Чанка нет в индексе или у него нет вектора — его нет и в ответе.
+// Векторного поиска нет (эмбеддер не задан или недоступен, индекс другой
+// модели) — ошибка: вызывающий откатывается на BM25-шкалу сам.
+func (s *Searcher) Score(ctx context.Context, index, query string, chunkIDs []string) (map[string]float64, error) {
+	idx, err := s.Store.Index(ctx, index)
+	if err != nil {
+		return nil, err
 	}
-	all := make([]scored, 0, len(di.vecs))
-	for i, v := range di.vecs {
-		if v == nil {
-			continue
+	switch {
+	case s.Embedder == nil:
+		return nil, errors.New("эмбеддер не задан")
+	case idx.Embedder == "" || idx.Dims == 0:
+		return nil, errors.New("индекс построен без векторов")
+	case idx.Embedder != s.Embedder.Model():
+		return nil, fmt.Errorf("индекс построен моделью %s, а эмбеддер — %s", idx.Embedder, s.Embedder.Model())
+	}
+	out := make(map[string]float64, len(chunkIDs))
+	if len(chunkIDs) == 0 {
+		return out, nil
+	}
+	di, err := s.load(ctx, idx)
+	if err != nil {
+		return nil, err
+	}
+	q, err := s.queryVec(ctx, idx, query)
+	if err != nil {
+		return nil, err
+	}
+	want := make(map[string]bool, len(chunkIDs))
+	for _, id := range chunkIDs {
+		want[id] = true
+	}
+	for i, c := range di.chunks {
+		if want[c.ID] && di.vecs[i] != nil {
+			out[c.ID] = float64(embed.Dot(q, di.vecs[i]))
 		}
-		all = append(all, scored{i, embed.Dot(qv[0], v)})
 	}
-	// Стабильная сортировка с разбором ничьих по порядку чанков:
-	// одинаковый вопрос — одинаковая выдача.
-	sort.SliceStable(all, func(a, b int) bool { return all[a].s > all[b].s })
-	if len(all) > k {
-		all = all[:k]
-	}
-	hits := make([]Hit, 0, len(all))
-	for r, x := range all {
-		hits = append(hits, Hit{Chunk: di.chunks[x.i], Score: float64(x.s), Rank: r + 1})
-	}
-	return hits, nil
+	return out, nil
 }
 
 // load — векторы индекса из кэша в памяти или из базы. Под мьютексом:
