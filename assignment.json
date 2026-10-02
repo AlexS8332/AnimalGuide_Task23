@@ -1,0 +1,14 @@
+{
+  "num": "23",
+  "slug": "animal-guide-rag-rerank",
+  "title": "AnimalGuide: улучшенный RAG — фильтр и реранкинг, переписывание запроса, сравнение режимов (DeepSeek, Go + браузер)",
+  "stack": "go",
+  "status": "planned",
+  "created": "2026-10-02",
+  "updated": "2026-10-02",
+  "repo": "",
+  "env": [
+    "DEEPSEEK_API_KEY"
+  ],
+  "tags": []
+}
