@@ -12,6 +12,10 @@
 //	kb ask "сколько видов малых панд в MDD v2.5?"  # ответ без базы и с базой рядом
 //	kb qa -repeat 2                   # контрольные вопросы → examples/rag/compare.md
 //	kb probe -write                   # знает ли модель ответ без базы → examples/rag/probe.md
+//	kb search -rewrite code -rerank hybrid -filter -trace "…"  # второй этап поиска с баллами кандидатов
+//	kb calibrate -out examples/rag/calibrate.md  # порог релевантности на dev+out (в индекс — с -write)
+//	kb matrix -k1 3,5,8               # режимы base/filter/rewrite/both → examples/rag/filter.md
+//	kb qa -modes rag,rag+both         # ответы с конвейером поиска v23
 //	kb help [команда]                 # список команд или справка по одной
 //
 // Подкоманды регистрируются в своих файлах (cmd/kb/<команда>.go) вызовом
