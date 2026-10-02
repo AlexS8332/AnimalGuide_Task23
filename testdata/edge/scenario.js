@@ -994,11 +994,12 @@
       assert(b.title.includes('hash-256'), 'подсказка: ' + b.title);
     });
 
-    await check('база знаний: шесть вкладок, корпус', async () => {
+    await check('база знаний: семь вкладок, корпус', async () => {
       await openKB();
       const tabs = qa('[data-kb-tab]').map(x => x.dataset.kbTab);
-      assert(tabs.join(',') === 'docs,chunks,search,ask,qa,report', 'вкладки: ' + tabs);
+      assert(tabs.join(',') === 'docs,chunks,search,ask,qa,modes,report', 'вкладки: ' + tabs);
       assert(text('[data-kb-tab="ask"]') === 'Спросить' && text('[data-kb-tab="qa"]') === 'Контрольные вопросы', 'надписи вкладок v22');
+      assert(text('[data-kb-tab="modes"]') === 'Режимы', 'надпись вкладки v23');
       assert(q('[data-kb-tab="docs"]').classList.contains('active'), 'открыта не «Корпус»');
       assert(text('[data-kb-tab="chunks"]') === 'Чанки' && text('[data-kb-tab="search"]') === 'Поиск' && text('[data-kb-tab="report"]') === 'Сравнение', 'надписи вкладок');
       const n = Number(text('#kb-n-docs'));
@@ -1180,6 +1181,20 @@
     sel.value = id;
     sel.dispatchEvent(new Event('change', { bubbles: true }));
   }
+  // kbSetModes — флажки режимов (v23) кликами: сначала снять лишние (пока
+  // остаётся хоть один), потом поставить нужные, потом снять остаток.
+  // Переключатель перерисовывается после каждого флажка — элемент ищется
+  // заново.
+  function kbSetModes(box, modes) {
+    const box$ = () => $(box);
+    const boxes = () => [...box$().querySelectorAll('[data-kb-mode]')];
+    const flip = m => click(box$().querySelector(`[data-kb-mode="${m}"]`));
+    for (const x of boxes()) if (x.checked && !modes.includes(x.dataset.kbMode) && boxes().filter(y => y.checked).length > 1) flip(x.dataset.kbMode);
+    for (const m of modes) if (!box$().querySelector(`[data-kb-mode="${m}"]`).checked) flip(m);
+    for (const x of boxes()) if (x.checked && !modes.includes(x.dataset.kbMode)) flip(x.dataset.kbMode);
+    const got = boxes().filter(x => x.checked).map(x => x.dataset.kbMode);
+    assert(got.join(',') === modes.join(','), 'режимы ' + box + ': ' + got);
+  }
   const kbAnswer = m => q(`#kb-answers .kb-answer[data-mode="${m}"]`);
   const kbAskCalls = () => factsCalls.filter(x => x.url.includes('/api/kb/ask'));
   async function kbAskGo(qtext) {
@@ -1302,12 +1317,64 @@
       await sleep(100);
       assert(kbAskCalls().length === n, 'ушёл пустой вопрос');
     });
+
+    await check('спросить v23: режимы: флажки, по умолчанию norag и rag, рядом не больше трёх', async () => {
+      const boxes = qa('#kb-ask-modes [data-kb-mode]');
+      assert(boxes.map(x => x.dataset.kbMode).join(',') === 'norag,rag,rag+filter,rag+rewrite,rag+both', 'режимы: ' + boxes.map(x => x.dataset.kbMode));
+      assert(boxes.filter(x => x.checked).map(x => x.dataset.kbMode).join(',') === 'norag,rag', 'по умолчанию');
+      kbSetModes('kb-ask-modes', ['norag', 'rag', 'rag+both']);
+      const off = qa('#kb-ask-modes [data-kb-mode]').filter(x => x.disabled).map(x => x.dataset.kbMode);
+      assert(off.join(',') === 'rag+filter,rag+rewrite', 'четвёртый режим не выключен: ' + off);
+      // Последний флажок не снимается.
+      kbSetModes('kb-ask-modes', ['rag']);
+      click(q('#kb-ask-modes [data-kb-mode="rag"]'));
+      assert(q('#kb-ask-modes [data-kb-mode="rag"]').checked, 'сняли последний режим');
+    });
+
+    await check('спросить v23: T07 в трёх режимах: три колонки рядом, у rag+both переписанный запрос', async () => {
+      kbSetModes('kb-ask-modes', ['norag', 'rag', 'rag+both']);
+      kbPick('T07');
+      const t07 = $('kb-ask-q').value;
+      assert(t07.includes('кошачий медведь'), 'текст: ' + t07);
+      const body = await kbAskGo(t07);
+      assert(body.modes.join(',') === 'norag,rag,rag+both' && body.question_id === 'T07', 'тело: ' + JSON.stringify(body));
+      const cols = qa('#kb-answers .kb-answer');
+      assert(cols.map(x => x.dataset.mode).join(',') === 'norag,rag,rag+both', 'колонки: ' + cols.map(x => x.dataset.mode));
+      const r = cols.map(x => x.getBoundingClientRect());
+      assert(Math.abs(r[0].top - r[2].top) < 2 && r[1].left > r[0].right - 1 && r[2].left > r[1].right - 1 && r[2].right <= $('window-body').getBoundingClientRect().right + 1, 'колонки не рядом');
+      const both = kbAnswer('rag+both');
+      assert(text('.kb-answer[data-mode="rag+both"] .kb-answer-head').includes('RAG + rewrite + фильтр'), 'заголовок: ' + text('.kb-answer[data-mode="rag+both"] .kb-answer-head'));
+      const tb = both.querySelector('.kb-tb');
+      assert(tb && tb.dataset.changed === '1' && tb.dataset.empty === '0', 'сводка пути поиска: ' + (tb && tb.textContent));
+      assert(tb.querySelector('.kb-tb-q').textContent.includes('малая панда') && tb.querySelector('.kb-tr-add'), 'переписанный: ' + tb.textContent);
+      assert([...tb.querySelectorAll('.kb-expanded')].some(x => x.textContent === 'кошачий медведь → малая панда'), 'синонимы: ' + tb.textContent);
+      assert(/осталось \d из 20 кандидатов/.test(tb.textContent) && tb.textContent.includes('порог 0.80'), 'осталось: ' + tb.textContent);
+      assert(!kbAnswer('rag').querySelector('.kb-tb') && !kbAnswer('norag').querySelector('.kb-srcs'), 'сводка не у того режима');
+      assert(both.querySelector('.kb-verdict[data-mode="rag+both"]').dataset.verdict === 'correct', 'вердикт rag+both');
+      assert(both.querySelectorAll('.kb-src').length >= 1 && both.querySelector('.kb-src[data-doc="red-panda"]'), 'фрагменты малой панды');
+      assert(q('#kb-ask-prompt .kb-prompt-col[data-mode="rag+both"]'), 'промпт rag+both');
+    });
+
+    await check('спросить v23: вопрос вне базы: у rag+filter пусто после фильтра', async () => {
+      kbSetModes('kb-ask-modes', ['rag', 'rag+filter']);
+      kbPick('T10');
+      await kbAskGo($('kb-ask-q').value);
+      const tb = kbAnswer('rag+filter').querySelector('.kb-tb');
+      assert(tb && tb.dataset.empty === '1' && tb.querySelector('.kb-tb-empty').textContent.includes('в базе ответа, вероятно, нет'), 'пусто: ' + (tb && tb.textContent));
+      assert(!kbAnswer('rag+filter').querySelector('.kb-src') && text('.kb-answer[data-mode="rag+filter"] .kb-srcs').includes('Фильтр отсёк всех кандидатов'), 'фрагменты: ' + text('.kb-answer[data-mode="rag+filter"] .kb-srcs'));
+      assert(kbAnswer('rag+filter').querySelector('.kb-verdict').dataset.verdict === 'abstain', 'вердикт: ' + kbAnswer('rag+filter').querySelector('.kb-verdict').dataset.verdict);
+      const r = await factsAPI('POST', '/api/kb/ask', { q: 'манул', modes: ['norag', 'rag', 'rag+filter', 'rag+both'] });
+      assert(r.code === 400 && r.error.includes('трёх'), 'четыре режима: ' + r.code + ' ' + r.error);
+      await sleep(100);
+      assert(window.__xss === undefined, 'исполнился код');
+    });
   };
 
   const kbRow = id => q(`#kb-qa-table .kb-qa-row[data-id="${id}"]`);
   const kbRowV = (id, m) => kbRow(id).querySelector(`.kb-verdict[data-mode="${m}"]`);
-  async function kbQaStart(repeats, judge) {
+  async function kbQaStart(repeats, judge, modes) {
     app.kb.pollMs = 150;
+    kbSetModes('kb-qa-modes', modes || ['norag', 'rag']);
     $('kb-qa-repeats').value = String(repeats);
     $('kb-qa-repeats').dispatchEvent(new Event('change', { bubbles: true }));
     $('kb-qa-judge').checked = judge;
@@ -1331,6 +1398,11 @@
       assert(kbRow('T10').querySelector('.kb-qa-exp').textContent.includes('в базе нет'), 'ожидание T10');
       assert(!q('#kb-qa-table .kb-verdict'), 'вердикты до прогона');
       assert($('kb-qa-repeats').value === '1' && $('kb-qa-judge').checked && !$('kb-qa-run').disabled, 'настройки');
+      // v23: по умолчанию — rag и rag+both, столбцы таблицы — по ним.
+      const on = qa('#kb-qa-modes [data-kb-mode]').filter(x => x.checked).map(x => x.dataset.kbMode);
+      assert(on.join(',') === 'rag,rag+both', 'режимы по умолчанию: ' + on);
+      assert(qa('#kb-qa-table th.kb-qa-v[data-mode]').map(x => x.dataset.mode).join(',') === 'rag,rag+both', 'столбцы: ' + text('#kb-qa-table tr'));
+      assert(text('#kb-qa-cost').includes('2 режима'), 'цена: ' + text('#kb-qa-cost'));
     });
 
     await check('контрольные вопросы: прогон заполняет строки по ходу', async () => {
@@ -1423,6 +1495,31 @@
       assert(qa('#kb-qa-table .kb-qa-row .kb-verdict[data-mode="rag"]:not(.pending)').length < 10 && !q('#kb-qa-summary'), 'прогон дошёл до конца');
       await until('в списке', () => q(`#kb-qa-runs .kb-qa-run[data-run="${id}"][data-state="cancelled"]`), 8000);
     });
+
+    await check('контрольные вопросы v23: прогон rag и rag+both: столбцы по режимам, сводка и путь поиска', async () => {
+      await kbQaStart(1, false, ['rag', 'rag+both']);
+      const body = JSON.parse(factsCalls.filter(x => x.url.endsWith('/api/kb/evals') && x.method === 'POST').pop().body);
+      assert(body.modes.join(',') === 'rag,rag+both', 'тело: ' + JSON.stringify(body));
+      assert(qa('#kb-qa-table th.kb-qa-v[data-mode]').map(x => x.dataset.mode).join(',') === 'rag,rag+both', 'столбцы');
+      await until('прогон готов', () => q('#kb-qa-status[data-state="done"]') && q('#kb-qa-summary'), 20000);
+      assert(text('#kb-qa-count') === '20 из 20 ответов', 'счётчик: ' + text('#kb-qa-count'));
+      assert(!kbRow('T03').querySelector('.kb-verdict[data-mode="norag"]'), 'столбец norag');
+      assert(kbRowV('T07', 'rag+both').dataset.verdict === 'correct' && kbRowV('T10', 'rag+both').dataset.verdict === 'abstain', 'вердикты rag+both');
+      assert(qa('.kb-qa-card').map(x => x.dataset.mode).join(',') === 'rag,rag+both', 'карточки');
+      assert(q('#kb-qa-stats th[data-mode="rag+both"]') && text('#kb-qa-stats th[data-mode="rag+both"]') === 'RAG + rewrite + фильтр', 'сводка: ' + text('#kb-qa-stats tr'));
+      assert(text('#kb-qa-conclusion').includes('rag+both верно'), 'вывод: ' + text('#kb-qa-conclusion'));
+      assert(kbRow('T07').querySelector('.kb-found').title.includes('rag+both'), 'источник по режимам: ' + kbRow('T07').querySelector('.kb-found').title);
+      click(kbRow('T07').querySelector('.kb-qa-q'));
+      await until('раскрыто', () => q('.kb-qa-detail[data-id="T07"]'));
+      const d = q('.kb-qa-detail[data-id="T07"]');
+      assert([...d.querySelectorAll('.kb-answer')].map(x => x.dataset.mode).join(',') === 'rag,rag+both', 'режимы раскрытой строки');
+      const tb = d.querySelector('.kb-answer[data-mode="rag+both"] .kb-tb');
+      assert(tb && tb.textContent.includes('малая панда') && !d.querySelector('.kb-answer[data-mode="rag"] .kb-tb'), 'путь поиска: ' + (tb && tb.textContent));
+      click(kbRow('T10').querySelector('.kb-qa-q'));
+      await until('раскрыто T10', () => q('.kb-qa-detail[data-id="T10"]'));
+      assert(q('.kb-qa-detail[data-id="T10"] .kb-answer[data-mode="rag+both"] .kb-tb[data-empty="1"]'), 'пусто у T10');
+      assert(q('#kb-qa-runs .kb-qa-run.on').textContent.includes('rag, rag+both'), 'режимы в списке прогонов: ' + text('#kb-qa-runs .kb-qa-run.on'));
+    });
   };
 
   scenarios['shot-kb-docs'] = async () => { await booted(); await openKB(); await sleep(200); };
@@ -1484,6 +1581,303 @@
       await until('итог', () => q('#kb-qa-summary'), 20000);
     }
     $('kb-qa-summary').scrollIntoView({ block: 'start' });
+    await sleep(200);
+  };
+
+  // ===== v23: второй этап поиска и вкладка «Режимы» =====
+
+  /* REST — тот же kbapi, конвейер подставной (edgeRetrieve в
+     edge_retrieve_test): кандидаты — настоящий BM25 по временной kb.db,
+     косинусы — правдоподобные, «кошачий медведь» переписывается в «малая
+     панда», динозавры и фосса — пустой итог. Матрица и калибровка — файлы,
+     как их пишут kb matrix и kb calibrate; kb-nofiles — файлов нет. */
+  const kbT07 = 'Сколько часов в день кошачий медведь тратит на еду?';
+  function kbSel(id, v) {
+    const el = $(id);
+    el.value = String(v);
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  function kbFlag(id, on) {
+    const el = $(id);
+    if (el.checked !== on) click(el);
+  }
+  // kbPipe — второй этап: rewrite, реранкинг, фильтр, K0, k.
+  function kbPipe(rewrite, rerank, filter, k0, k) {
+    kbSel('kb-rewrite', rewrite);
+    kbSel('kb-rerank', rerank);
+    kbFlag('kb-filter', filter);
+    if (k0) kbSel('kb-k0', k0);
+    if (k) kbSel('kb-k', k);
+  }
+  async function kbFind(query) {
+    $('kb-q').value = query;
+    $('kb-q').dispatchEvent(new Event('input', { bubbles: true }));
+    click('#kb-go');
+    await until('выдача', () => q('#kb-results') && (q('#kb-results').dataset.query === query || q('#kb-search-error')) && !$('kb-go').disabled, 8000);
+  }
+  const kbCands = () => qa('#kb-cands .kb-cand');
+  const kbSearchCalls = () => factsCalls.filter(x => x.url.includes('/api/kb/search'));
+
+  scenarios['kb-trace'] = async () => {
+    spyFetch();
+    await booted();
+    window.__xss = undefined;
+
+    await check('поиск v23: переключатели второго этапа, по умолчанию выключены', async () => {
+      await openKB();
+      await kbTabOpen('search', '#kb-search-form');
+      for (const id of ['kb-index', 'kb-rewrite', 'kb-rerank', 'kb-filter', 'kb-k0', 'kb-ctx']) assert($(id), 'нет #' + id);
+      assert($('kb-rewrite').value === '' && $('kb-rerank').value === '' && !$('kb-filter').checked && $('kb-k0').value === '20' && $('kb-index').value === 'all', 'умолчания');
+      assert([...$('kb-rewrite').options].map(o => o.value).join(',') === ',code,llm' && [...$('kb-rerank').options].map(o => o.value).join(',') === ',hybrid,llm', 'варианты');
+      assert(!$('kb-mode').disabled && !q('#kb-stage2.on'), 'второй этап включён');
+      await kbFind('чем питается харза');
+      assert(qa('.kb-result').length === 2 && !q('#kb-trace'), 'без конвейера — два индекса рядом');
+      const u = new URL(kbSearchCalls().pop().url, location.href);
+      assert(!u.searchParams.has('filter') && !u.searchParams.has('k0') && u.searchParams.get('mode') === 'dense', 'параметры: ' + u.search);
+    });
+
+    await check('поиск v23: «кошачий медведь»: rewrite, гибрид, фильтр: исходный и переписанный запрос, 20 кандидатов', async () => {
+      kbPipe('code', 'hybrid', true, 20, 5);
+      assert($('kb-mode').disabled && q('#kb-stage2.on') && text('#kb-search-hint').includes('Второй этап'), 'второй этап не включился');
+      await kbFind(kbT07);
+      const u = new URL(kbSearchCalls().pop().url, location.href);
+      const p = k => u.searchParams.get(k);
+      assert(p('rewrite') === 'code' && p('rerank') === 'hybrid' && p('filter') === '1' && p('k0') === '20' && p('k') === '5' && p('index') === 'structure' && !u.searchParams.has('mode'), 'параметры: ' + u.search);
+      assert(q('#kb-trace') && qa('.kb-result').length === 0, 'нет блока «до и после»');
+      assert(text('#kb-original') === kbT07, 'исходный: ' + text('#kb-original'));
+      assert(text('#kb-rewritten').startsWith(kbT07) && text('#kb-rewritten').includes('малая панда Ailurus fulgens'), 'переписанный: ' + text('#kb-rewritten'));
+      assert(q('#kb-rewritten .kb-tr-add') && q('#kb-rewritten .kb-tr-add').textContent.includes('малая панда'), 'добавленное не выделено');
+      assert(qa('.kb-expanded').map(x => x.textContent).includes('кошачий медведь → малая панда'), 'синонимы: ' + qa('.kb-expanded').map(x => x.textContent));
+      const line = text('#kb-tr-line');
+      assert(/кандидатов 20 → осталось [1-5]/.test(line) && line.includes('порог 0.80') && line.includes('Δ 0.05') && line.includes('dense') && line.includes('гибрид'), 'сводка: ' + line);
+      assert(!q('#kb-empty'), 'плашка «пусто» при найденном');
+    });
+
+    await check('поиск v23: таблица кандидатов: ранги, косинус с чертой порога, отсечённые зачёркнуты с причиной', async () => {
+      const rows = kbCands();
+      assert(rows.length === 20, 'кандидатов ' + rows.length);
+      assert(rows.map(r => r.querySelector('.kb-cand-rank').textContent).join(',') === Array.from({ length: 20 }, (_, i) => i + 1).join(','), 'ранги не по порядку');
+      const kept = rows.filter(r => r.dataset.kept === '1'), cut = rows.filter(r => r.dataset.kept === '0');
+      assert(kept.length >= 1 && kept.length <= 5 && String(kept.length) === text('#kb-k1-n'), 'осталось: ' + kept.length + ' / ' + text('#kb-k1-n'));
+      assert(kept.some(r => r.dataset.doc === 'red-panda'), 'малой панды нет в итоге');
+      rows.forEach(r => assert(/^[a-z0-9-]+\/structure\/\d{3}$/.test(r.dataset.chunk), 'chunk_id: ' + r.dataset.chunk));
+      cut.forEach(r => {
+        assert(r.querySelector('.kb-reason') && r.querySelector('.kb-reason').textContent.trim(), 'нет причины у ' + r.dataset.chunk);
+        assert(getComputedStyle(r.querySelector('.kb-cand-where')).textDecorationLine.includes('line-through'), 'не зачёркнут ' + r.dataset.chunk);
+      });
+      kept.forEach(r => assert(r.querySelector('.kb-kept') && !r.querySelector('.kb-reason') && !getComputedStyle(r.querySelector('.kb-cand-where')).textDecorationLine.includes('line-through'), 'оставленный ' + r.dataset.chunk));
+      const reasons = new Set(cut.map(r => r.querySelector('.kb-reason').textContent));
+      assert(reasons.has('порог 0.80') && reasons.size >= 2, 'причины: ' + [...reasons]);
+      // Косинус 0,76–0,89, черта порога — одна вертикаль во всех строках.
+      const cos = rows.map(r => Number(r.querySelector('.kb-cos-v').textContent));
+      assert(cos.every(x => x >= 0.75 && x <= 0.89), 'косинусы: ' + cos);
+      const lefts = rows.map(r => r.querySelector('.kb-cos-thr').getBoundingClientRect().left);
+      assert(Math.max(...lefts) - Math.min(...lefts) < 1.5 && lefts[0] > rows[0].querySelector('.kb-cos').getBoundingClientRect().left, 'черта порога не вертикаль: ' + lefts);
+      // Ниже порога — полоса не доходит до черты, выше — заходит за неё.
+      const low = rows.find(r => Number(r.querySelector('.kb-cos-v').textContent) < 0.8);
+      assert(low && low.querySelector('.kb-cos-fill').getBoundingClientRect().right <= low.querySelector('.kb-cos-thr').getBoundingClientRect().left + 1, 'полоса ниже порога');
+      assert(kept[0].querySelector('.kb-cos-fill').getBoundingClientRect().right > kept[0].querySelector('.kb-cos-thr').getBoundingClientRect().right, 'полоса выше порога');
+      const rd = rows.map(r => r.children[2].textContent), rb = rows.map(r => r.children[3].textContent), rrf = rows.map(r => Number(r.children[4].textContent));
+      assert(rd.every(x => /^\d+$/.test(x)) && rb.every(x => /^\d+$/.test(x)), 'ранги dense/BM25');
+      assert(rrf.every((x, i) => i === 0 || x <= rrf[i - 1] + 1e-9) && rrf[0] > 0.03, 'RRF не по убыванию: ' + rrf);
+      assert(rows[0].querySelector('.kb-cand-where').textContent.includes('›'), 'статья › раздел');
+      const tr = q('#kb-cands').getBoundingClientRect(), wb = $('window-body').getBoundingClientRect();
+      assert(tr.right <= wb.right + 1, 'таблица шире окна');
+    });
+
+    await check('поиск v23: клик по кандидату: к чанку, форма второго этапа сохраняется', async () => {
+      const r = kbCands().find(x => x.dataset.kept === '1');
+      const id = r.dataset.chunk;
+      click(r.querySelector('.kb-cand-where'));
+      await until('чанк', () => q(`#kb-text[data-doc="${r.dataset.doc}"][data-index="structure"] .kb-chunk.focus[data-id="${id}"]`), 8000);
+      await kbTabOpen('search', '#kb-trace');
+      assert($('kb-rewrite').value === 'code' && $('kb-rerank').value === 'hybrid' && $('kb-filter').checked && $('kb-q').value === kbT07, 'форма сброшена');
+      assert(kbCands().length === 20, 'выдача пропала');
+    });
+
+    await check('поиск v23: вопрос вне базы: пусто после фильтра, плашка «в базе ответа, вероятно, нет»', async () => {
+      await kbFind('Сколько весил самый крупный динозавр?');
+      assert(q('#kb-trace[data-empty="1"]') && q('#kb-empty'), 'нет плашки');
+      assert(text('#kb-empty').includes('Пусто после фильтра') && text('#kb-empty').includes('в базе ответа, вероятно, нет') && text('#kb-empty').includes('ниже порога 0.80'), 'плашка: ' + text('#kb-empty'));
+      assert(kbCands().length === 20 && kbCands().every(r => r.dataset.kept === '0' && r.querySelector('.kb-reason').textContent === 'порог 0.80'), 'не все отсечены порогом');
+      assert(text('#kb-k1-n') === '0', 'осталось: ' + text('#kb-k1-n'));
+      assert(text('#kb-rewritten') === text('#kb-original') && q('.kb-tr-q[data-changed="0"]'), 'переписан без синонимов');
+      const e = $('kb-empty').getBoundingClientRect();
+      assert(e.height > 20 && getComputedStyle($('kb-empty')).borderLeftWidth === '5px', 'плашка незаметна');
+    });
+
+    await check('поиск v23: без фильтра: итог первые k, остальные «за пределами K1»; K0 = 10', async () => {
+      kbPipe('', '', false, 10, 3);
+      assert(!q('#kb-stage2.on') && !$('kb-mode').disabled, 'всё выключено — второй этап выключен');
+      kbSel('kb-rewrite', 'code');
+      await kbFind(kbT07);
+      const rows = kbCands();
+      assert(rows.length === 10 && rows.filter(r => r.dataset.kept === '1').length === 3, 'кандидатов ' + rows.length);
+      assert(rows.slice(0, 3).every(r => r.dataset.kept === '1') && rows.slice(3).every(r => r.querySelector('.kb-reason').textContent === 'за пределами K1'), 'причины без фильтра');
+      assert(text('#kb-tr-line').includes('фильтр выключен') && text('#kb-tr-line').includes('реранкинг нет'), 'сводка: ' + text('#kb-tr-line'));
+      assert(rows.every(r => r.children[4].textContent === '—'), 'RRF без реранкинга');
+    });
+
+    await check('поиск v23: продолжение: предыдущий вопрос уходит в context', async () => {
+      kbSel('kb-k', 5);
+      $('kb-ctx').value = 'Расскажи про харзу';
+      $('kb-ctx').dispatchEvent(new Event('input', { bubbles: true }));
+      await kbFind('А сколько она весит?');
+      const u = new URL(kbSearchCalls().pop().url, location.href);
+      assert(u.searchParams.getAll('context').join('|') === 'Расскажи про харзу', 'context: ' + u.search);
+      assert(text('#kb-rewritten').includes('Расскажи про харзу') && qa('.kb-expanded').some(x => x.textContent.includes('вид из контекста')), 'переписанный: ' + text('#kb-rewritten'));
+      $('kb-ctx').value = '';
+      $('kb-ctx').dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    await check('поиск v23: rewrite моделью без модели: 503 с подсказкой', async () => {
+      kbSel('kb-rewrite', 'llm');
+      await kbFind('манул');
+      assert(q('#kb-search-error[data-code="503"]') && text('#kb-search-error').includes('модели нет') && text('#kb-search-error').includes('DEEPSEEK_API_KEY'), 'ошибка: ' + text('#kb-results'));
+    });
+
+    await check('поиск v23: разметка в запросе, синонимах, заметке и статье: буквами', async () => {
+      kbPipe('code', 'hybrid', true, 20, 5);
+      const query = 'ксенофоб ест теги <img src=x onerror="window.__xss=48">';
+      await kbFind(query);
+      assert(text('#kb-original') === query.replace(/\s+/g, ' '), 'исходный: ' + text('#kb-original'));
+      assert(text('#kb-rewritten').includes('<b>проверочный зверёк</b>'), 'переписанный: ' + text('#kb-rewritten'));
+      assert(qa('.kb-expanded').some(x => x.textContent.includes('<i>ксенофоб</i>')), 'синоним');
+      assert(text('.kb-tr-note').includes('<img src=x'), 'заметка: ' + text('.kb-tr-note'));
+      assert(kbCands().some(r => r.dataset.doc === 'xss-test'), 'нет кандидата xss-test');
+      assert(!q('#kb-trace img, #kb-trace script, #kb-rewritten b, .kb-expanded *, .kb-tr-note *, .kb-cand-where i, #kb-original *'), 'элемент из данных в блоке');
+      await sleep(100);
+      assert(window.__xss === undefined, 'исполнился код: __xss=' + window.__xss);
+    });
+
+    await check('поиск v23: всё выключено: снова два индекса рядом', async () => {
+      kbPipe('', '', false);
+      await kbFind('чем питается харза');
+      assert(qa('.kb-result').length === 2 && !q('#kb-trace'), 'не вернулся прямой поиск');
+    });
+  };
+
+  scenarios['kb-modes'] = async () => {
+    spyFetch();
+    await booted();
+    window.__xss = undefined;
+
+    await check('режимы: матрица режимов: test по умолчанию, лучшее выделено, вывод', async () => {
+      await openKB();
+      await kbTabOpen('modes', '#kb-matrix');
+      const rows = qa('#kb-matrix .kb-mx-row');
+      assert(rows.length === 12 && rows.every(r => r.dataset.split === 'test'), 'строк ' + rows.length);
+      assert(rows.slice(0, 4).map(r => r.dataset.name).join(',') === 'base,filter,rewrite,both' && rows[0].dataset.k1 === '3', 'порядок');
+      assert(qa('#kb-matrix .kb-mx-row.grp').length === 3, 'группы K1');
+      const head = text('#kb-matrix tr');
+      for (const h of ['recall до', 'recall после', 'precision', 'отсечено', 'ошибочно отсечено', 'токенов', 'мс', 'цена']) assert(head.includes(h), 'нет колонки ' + h);
+      assert(!head.includes('out: пусто'), 'колонка out на test');
+      const both5 = q('#kb-matrix .kb-mx-row[data-name="both"][data-k1="5"]');
+      assert(both5.querySelector('[data-col="recall_after"]').classList.contains('best') && both5.querySelector('[data-col="precision"]').classList.contains('best'), 'both не лучший');
+      assert(both5.querySelector('[data-col="recall_after"]').textContent === '0.90' && q('#kb-matrix .kb-mx-row[data-name="base"][data-k1="5"] [data-col="recall_after"]').textContent === '0.80', 'числа');
+      assert(getComputedStyle(both5.querySelector('.best')).fontWeight >= 600, 'лучшее не жирное');
+      assert(qa('#kb-modes-conclusion li').length === 5 && text('#kb-modes-conclusion').includes('5 из 6'), 'вывод: ' + text('#kb-modes-conclusion'));
+      assert(text('#kb-matrix-meta').includes('multilingual-e5-base') && text('#kb-matrix-meta').includes('0.815'), 'шапка: ' + text('#kb-matrix-meta'));
+      const t = q('#kb-matrix').getBoundingClientRect(), wb = $('window-body').getBoundingClientRect();
+      assert(t.right <= wb.right + 1, 'матрица шире окна');
+    });
+
+    await check('режимы: наборы out и «все»', async () => {
+      click('[data-kb-split="out"]');
+      await until('out', () => qa('#kb-matrix .kb-mx-row').every(r => r.dataset.split === 'out') && qa('#kb-matrix .kb-mx-row').length === 12);
+      const both = q('#kb-matrix .kb-mx-row[data-name="both"][data-k1="5"] [data-col="out_empty"]');
+      assert(both.textContent.includes('5 из 6') && both.classList.contains('best'), 'out: ' + both.textContent);
+      assert(q('#kb-matrix .kb-mx-row[data-name="both"][data-k1="5"] [data-col="recall_after"]').textContent === '—', 'recall на out');
+      assert(q('#kb-matrix .kb-mx-row[data-name="base"][data-k1="5"] [data-col="out_empty"]').textContent.includes('0 из 6'), 'base out');
+      click('[data-kb-split="all"]');
+      await until('все', () => qa('#kb-matrix .kb-mx-row').length === 36);
+      click('[data-kb-split="test"]');
+      await until('test', () => qa('#kb-matrix .kb-mx-row').length === 12);
+    });
+
+    await check('режимы: калибровка: таблица порогов, выбранный отмечен', async () => {
+      const rows = qa('#kb-calib-table .kb-cal-row');
+      assert(rows.length === 15 && rows[0].dataset.min === '0.780' && rows[14].dataset.min === '0.850', 'пороги: ' + rows.map(r => r.dataset.min));
+      const chosen = rows.filter(r => r.classList.contains('chosen'));
+      assert(chosen.length === 1 && chosen[0].dataset.min === '0.815' && chosen[0].querySelector('.kb-chosen'), 'выбранный: ' + chosen.map(r => r.dataset.min));
+      assert(chosen[0].children[1].textContent === '0.95' && chosen[0].children[2].textContent === '83.3 %' && chosen[0].textContent.includes('D01'), 'строка 0.815: ' + chosen[0].textContent);
+      assert(text('#kb-calib-chosen') === '0.815' && text('#kb-calib-meta').includes('допустимое падение 0.05'), 'шапка: ' + text('#kb-calib-meta'));
+    });
+
+    await check('режимы: гистограмма косинусов dev и out с чертой порога (SVG)', async () => {
+      const svg = q('svg#kb-hist');
+      assert(svg && svg.dataset.dev === '20' && svg.dataset.out === '6', 'нет гистограммы');
+      const sum = sel => qa(sel).reduce((s, r) => s + Number(r.dataset.n), 0);
+      assert(sum('#kb-hist .kb-hist-dev') === 20 && sum('#kb-hist .kb-hist-out') === 6, 'столбики: ' + sum('#kb-hist .kb-hist-dev') + ' / ' + sum('#kb-hist .kb-hist-out'));
+      const thr = q('#kb-hist .kb-hist-thr');
+      assert(thr && text('#kb-hist .kb-hist-thr-l') === 'порог 0.815', 'черта порога');
+      // Out — левее черты (кроме одного), dev — правее (кроме одного).
+      const x = Number(thr.getAttribute('x1'));
+      const left = qa('#kb-hist .kb-hist-out').filter(r => Number(r.getAttribute('x')) < x).reduce((s, r) => s + Number(r.dataset.n), 0);
+      assert(left === 5, 'out левее порога: ' + left);
+      const r = svg.getBoundingClientRect();
+      assert(r.width >= 300 && r.height >= 120, 'размер: ' + r.width + '×' + r.height);
+      assert(!q('#kb-modes img, #kb-modes script'), 'элемент из данных');
+    });
+
+    await check('режимы: REST matrix и calibration', async () => {
+      const m = await factsAPI('GET', '/api/kb/matrix'), c = await factsAPI('GET', '/api/kb/calibration');
+      assert(m.ok && m.data.rows.length === 36 && c.ok && c.data.chosen === 0.815, 'ответы: ' + m.code + ' ' + c.code);
+    });
+  };
+
+  scenarios['kb-nofiles'] = async () => {
+    await booted();
+    await check('режимы: файлов нет: подсказки с командами', async () => {
+      await openKB();
+      await kbTabOpen('modes', '#kb-matrix-none');
+      assert(text('#kb-matrix-none').includes('Матрицы режимов ещё нет') && text('#kb-matrix-none').includes('go run ./cmd/kb matrix'), 'матрица: ' + text('#kb-matrix-none'));
+      assert(text('#kb-calib-none').includes('Калибровки порога ещё нет') && text('#kb-calib-none').includes('go run ./cmd/kb calibrate'), 'калибровка: ' + text('#kb-calib-none'));
+      assert(!q('#kb-matrix') && !q('#kb-hist'), 'таблицы без файлов');
+      const r = await factsAPI('GET', '/api/kb/matrix');
+      assert(r.code === 404 && r.data.hint === 'go run ./cmd/kb matrix', 'REST: ' + r.code + ' ' + JSON.stringify(r.data));
+    });
+  };
+
+  scenarios['shot-kb-trace'] = async () => {
+    await booted();
+    await openKB();
+    await kbTabOpen('search', '#kb-search-form');
+    kbPipe('code', 'hybrid', true, 20, 5);
+    await kbFind(kbT07);
+    $('window-body').scrollTop = 0;
+    await sleep(200);
+  };
+  scenarios['shot-kb-trace-empty'] = async () => {
+    await booted();
+    await openKB();
+    await kbTabOpen('search', '#kb-search-form');
+    kbPipe('code', 'hybrid', true, 20, 5);
+    await kbFind('Сколько весил самый крупный динозавр?');
+    $('window-body').scrollTop = 0;
+    await sleep(200);
+  };
+  scenarios['shot-kb-modes'] = async () => {
+    await booted();
+    await openKB();
+    await kbTabOpen('modes', '#kb-matrix');
+    $('window-body').scrollTop = 0;
+    await sleep(200);
+  };
+  scenarios['shot-kb-calib'] = async () => {
+    await scenarios['shot-kb-modes']();
+    $('kb-calib').scrollIntoView({ block: 'start' });
+    await sleep(200);
+  };
+  scenarios['shot-kb-ask-modes'] = async () => {
+    await booted();
+    await openKB();
+    await kbTabOpen('ask', '#kb-ask-pick optgroup');
+    kbSetModes('kb-ask-modes', ['norag', 'rag', 'rag+both']);
+    kbPick('T07');
+    click('#kb-ask-go');
+    await until('ответы', () => q('#kb-answers') && !$('kb-ask-go').disabled, 8000);
+    $('window-body').scrollTop = 0;
     await sleep(200);
   };
 

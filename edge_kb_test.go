@@ -26,6 +26,9 @@ import (
 // неотвечающим эмбеддером — по адресу страницы (Referer), как facts-down.
 type edgeKB struct {
 	ok, none http.Handler
+	// nofiles — база есть, а матрицы режимов и калибровки ещё нет (v23):
+	// сценарии с «kb-nofiles» в адресе.
+	nofiles http.Handler
 	// rag — подставной отвечающий агент (v22): ask и evals без модели.
 	rag *edgeRAG
 }
@@ -94,6 +97,13 @@ func newEdgeKB(t *testing.T) *edgeKB {
 	ok := &kbapi.API{Searcher: s, Embedder: &embed.HTTP{BaseURL: fake.URL, Name: fake.Model}, Path: path, Questions: questions}
 	r := newEdgeRAG(s, qs)
 	r.wire(ok)
+	// v23: подставной конвейер, матрица режимов и калибровка — файлы, как их
+	// пишут kb matrix и kb calibrate.
+	ok.MatrixPath = edgeWriteJSON(t, dir, "filter.json", edgeMatrix())
+	ok.CalibrationPath = edgeWriteJSON(t, dir, "calibrate.json", edgeCalibration())
+	nofiles := &kbapi.API{Searcher: s, Embedder: ok.Embedder, Path: path, Questions: questions,
+		MatrixPath: filepath.Join(dir, "нет", "filter.json"), CalibrationPath: filepath.Join(dir, "нет", "calibrate.json")}
+	r.wire(nofiles)
 
 	dead := httptest.NewServer(http.NotFoundHandler())
 	deadURL := dead.URL
@@ -102,7 +112,7 @@ func newEdgeKB(t *testing.T) *edgeKB {
 	none := &kbapi.API{Embedder: &embed.HTTP{BaseURL: deadURL, Name: embed.DefaultModel}, Path: nonePath, Why: "базы знаний нет: " + nonePath,
 		Questions: questions}
 
-	return &edgeKB{ok: edgeKBMux(ok), none: edgeKBMux(none), rag: r}
+	return &edgeKB{ok: edgeKBMux(ok), none: edgeKBMux(none), nofiles: edgeKBMux(nofiles), rag: r}
 }
 
 func edgeKBMux(a *kbapi.API) http.Handler {
@@ -116,6 +126,10 @@ func edgeKBMux(a *kbapi.API) http.Handler {
 func (e *edgeKB) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if strings.Contains(r.Referer(), "kb-none") {
 		e.none.ServeHTTP(w, r)
+		return
+	}
+	if strings.Contains(r.Referer(), "kb-nofiles") {
+		e.nofiles.ServeHTTP(w, r)
 		return
 	}
 	// Опрос прогона пропускает следующий вопрос — после ответа: окно
