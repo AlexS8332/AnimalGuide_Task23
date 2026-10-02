@@ -1645,7 +1645,9 @@
       assert(p('rewrite') === 'code' && p('rerank') === 'hybrid' && p('filter') === '1' && p('k0') === '20' && p('k') === '5' && p('index') === 'structure' && !u.searchParams.has('mode'), 'параметры: ' + u.search);
       assert(q('#kb-trace') && qa('.kb-result').length === 0, 'нет блока «до и после»');
       assert(text('#kb-original') === kbT07, 'исходный: ' + text('#kb-original'));
-      assert(text('#kb-rewritten').startsWith(kbT07) && text('#kb-rewritten').includes('малая панда Ailurus fulgens'), 'переписанный: ' + text('#kb-rewritten'));
+      assert(text('#kb-rewritten').startsWith(kbT07) && text('#kb-rewritten').includes('малая панда') && !text('#kb-rewritten').includes('Ailurus'), 'переписанный: ' + text('#kb-rewritten'));
+      assert(text('#kb-bm25q').includes('малая панда Ailurus fulgens'), 'запрос BM25: ' + text('#kb-bm25q'));
+      assert(!q('#kb-anchored') && text('#kb-top-gap').includes('отрыв'), 'якорь или отрыв: ' + text('#kb-tr-line'));
       assert(q('#kb-rewritten .kb-tr-add') && q('#kb-rewritten .kb-tr-add').textContent.includes('малая панда'), 'добавленное не выделено');
       assert(qa('.kb-expanded').map(x => x.textContent).includes('кошачий медведь → малая панда'), 'синонимы: ' + qa('.kb-expanded').map(x => x.textContent));
       const line = text('#kb-tr-line');
@@ -1704,6 +1706,14 @@
       assert(text('#kb-rewritten') === text('#kb-original') && q('.kb-tr-q[data-changed="0"]'), 'переписан без синонимов');
       const e = $('kb-empty').getBoundingClientRect();
       assert(e.height > 20 && getComputedStyle($('kb-empty')).borderLeftWidth === '5px', 'плашка незаметна');
+    });
+
+    await check('поиск v23: вид назван в запросе — плашка «абсолютный порог не применяется», отрыв лучшего', async () => {
+      await kbFind('Сколько весит манул?');
+      assert(q('#kb-anchored') && text('#kb-anchored').includes('Вид назван в запросе') && text('#kb-anchored').includes('манул') &&
+        text('#kb-anchored').includes('абсолютный порог не применяется'), 'плашка якоря: ' + text('#kb-trace'));
+      assert(kbCands().every(r => !(r.querySelector('.kb-reason') || { textContent: '' }).textContent.startsWith('порог')), 'пол применён к якорному запросу');
+      assert(!q('#kb-empty') && /отрыв \d\.\d{3}/.test(text('#kb-top-gap')) && text('#kb-tr-line').includes('(умолчание)'), 'сводка: ' + text('#kb-tr-line'));
     });
 
     await check('поиск v23: без фильтра: итог первые k, остальные «за пределами K1»; K0 = 10', async () => {
@@ -1770,7 +1780,9 @@
       assert(rows.slice(0, 4).map(r => r.dataset.name).join(',') === 'base,filter,rewrite,both' && rows[0].dataset.k1 === '3', 'порядок');
       assert(qa('#kb-matrix .kb-mx-row.grp').length === 3, 'группы K1');
       const head = text('#kb-matrix tr');
-      for (const h of ['recall до', 'recall после', 'precision', 'отсечено', 'ошибочно отсечено', 'токенов', 'мс', 'цена']) assert(head.includes(h), 'нет колонки ' + h);
+      for (const h of ['recall до', 'dense∪BM25', 'recall после', 'precision', 'отсечено', 'ошибочно отсечено', 'доказательство снято', 'токенов', 'мс', 'цена']) assert(head.includes(h), 'нет колонки ' + h);
+      const filter3 = q('#kb-matrix .kb-mx-row[data-name="filter"][data-k1="3"]');
+      assert(filter3.querySelector('[data-col="wrong_cut"]').textContent === '2.0 %' && filter3.querySelector('[data-col="lost_q"]').textContent === '5.0 %', 'ошибочно отсечено и снято: ' + filter3.textContent);
       assert(!head.includes('out: пусто'), 'колонка out на test');
       const both5 = q('#kb-matrix .kb-mx-row[data-name="both"][data-k1="5"]');
       assert(both5.querySelector('[data-col="recall_after"]').classList.contains('best') && both5.querySelector('[data-col="precision"]').classList.contains('best'), 'both не лучший');
@@ -1802,6 +1814,8 @@
       assert(chosen.length === 1 && chosen[0].dataset.min === '0.815' && chosen[0].querySelector('.kb-chosen'), 'выбранный: ' + chosen.map(r => r.dataset.min));
       assert(chosen[0].children[1].textContent === '0.95' && chosen[0].children[2].textContent === '83.3 %' && chosen[0].textContent.includes('D01'), 'строка 0.815: ' + chosen[0].textContent);
       assert(text('#kb-calib-chosen') === '0.815' && text('#kb-calib-meta').includes('допустимое падение 0.05'), 'шапка: ' + text('#kb-calib-meta'));
+      assert(text('#kb-calib-rule').includes('max-drop') && text('#kb-calib-gap').includes('зазор -0.011') && text('#kb-calib-gap').includes('T06') &&
+        text('#kb-calib-gap').includes('зазора нет'), 'зазор: ' + text('#kb-calib-gap'));
     });
 
     await check('режимы: гистограмма косинусов dev и out с чертой порога (SVG)', async () => {

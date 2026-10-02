@@ -183,7 +183,7 @@ func Calibrate(ctx context.Context, p *Pipeline, qs kb.QuestionSet, index string
 	switch {
 	case cal.OutMax >= 0 && cal.EvidenceMin >= 0 && cal.Gap > 0:
 		cal.Rule = CalibGap
-		cal.Chosen = round4((cal.OutMax + cal.EvidenceMin) / 2)
+		cal.Chosen = round3((cal.OutMax + cal.EvidenceMin) / 2)
 	default:
 		cal.Rule = CalibMaxDrop
 		cal.Chosen = byDrop
@@ -202,10 +202,10 @@ func Calibrate(ctx context.Context, p *Pipeline, qs kb.QuestionSet, index string
 		}
 	}
 	if cal.OutMax >= 0 {
-		cal.MarginOut = round4(cal.Chosen - cal.OutMax)
+		cal.MarginOut = round3(cal.Chosen - cal.OutMax)
 	}
 	if cal.EvidenceMin >= 0 {
-		cal.MarginDev = round4(cal.EvidenceMin - cal.Chosen)
+		cal.MarginDev = round3(cal.EvidenceMin - cal.Chosen)
 	}
 	cal.At = row(cal.Chosen)
 	if write {
@@ -236,7 +236,6 @@ func evidenceCos(t Trace, ev []evidence) float64 {
 }
 
 func round3(x float64) float64 { return math.Round(x*1000) / 1000 }
-func round4(x float64) float64 { return math.Round(x*10000) / 10000 }
 
 // chosenRow — строка с выбранным порогом (At; у старых отчётов — из таблицы).
 func (c Calibration) chosenRow() (CalibRow, bool) {
@@ -271,14 +270,14 @@ func (c Calibration) Markdown() string {
 		rule = fmt.Sprintf("правило max-drop %.2f", c.MaxDrop)
 	}
 	if r, ok := c.chosenRow(); ok {
-		fmt.Fprintf(&b, "Порог **%.4g** (%s): recall на dev %.2f (без фильтра %.2f), пусто на out %d из %d", c.Chosen, rule, r.DevRecall, c.Base,
+		fmt.Fprintf(&b, "Порог **%.3f** (%s): recall на dev %.2f (без фильтра %.2f), пусто на out %d из %d", c.Chosen, rule, r.DevRecall, c.Base,
 			int(math.Round(r.OutEmpty*float64(c.OutN))), c.OutN)
 		if len(r.LostDev) > 0 {
 			fmt.Fprintf(&b, ", потеряно на dev: %s", strings.Join(r.LostDev, ", "))
 		}
 		b.WriteString(".")
 	} else {
-		fmt.Fprintf(&b, "Порог **%.4g** (%s).", c.Chosen, rule)
+		fmt.Fprintf(&b, "Порог **%.3f** (%s).", c.Chosen, rule)
 	}
 	if c.Written {
 		b.WriteString(" Записан в индекс.\n")
@@ -303,7 +302,7 @@ func (c Calibration) Markdown() string {
 		b.WriteString("- неякорных dev с доказательством среди кандидатов нет;\n")
 	}
 	if c.OutMax >= 0 && c.EvidenceMin >= 0 {
-		fmt.Fprintf(&b, "- зазор %+.3f; порог %.4g; запас до вопросов вне базы %+.4f, до доказательств %+.4f.\n", c.Gap, c.Chosen, c.MarginOut, c.MarginDev)
+		fmt.Fprintf(&b, "- зазор %+.3f; порог %.3f; запас до вопросов вне базы %+.3f, до доказательств %+.3f.\n", c.Gap, c.Chosen, c.MarginOut, c.MarginDev)
 	}
 	b.WriteString("\n## Лучший косинус кандидатов\n\n")
 	fmt.Fprintf(&b, "- dev: %s\n- out: %s\n", floats(c.DevTop), floats(c.OutTop))

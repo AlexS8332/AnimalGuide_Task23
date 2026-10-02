@@ -189,7 +189,7 @@ func TestCalibrateGap(t *testing.T) {
 		t.Fatal(err)
 	}
 	if cal.Rule != CalibGap || cal.OutMaxID != "O1" || cal.EvidenceMinID != "D1" || cal.Gap <= 0 ||
-		math.Abs(cal.Chosen-(cal.OutMax+cal.EvidenceMin)/2) > 1e-4 || math.Abs(cal.MarginOut-cal.MarginDev) > 2e-4 || cal.MarginOut <= 0 {
+		math.Abs(cal.Chosen-(cal.OutMax+cal.EvidenceMin)/2) > 6e-4 || math.Abs(cal.MarginOut-cal.MarginDev) > 1.1e-3 || cal.MarginOut <= 0 {
 		t.Fatalf("зазор: %+v", cal)
 	}
 	if strings.Join(cal.FloorDev, ",") != "D1" || strings.Join(cal.FloorOut, ",") != "O1" || strings.Join(cal.FloorTest, ",") != "T1" ||

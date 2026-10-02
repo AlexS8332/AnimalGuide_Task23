@@ -25,29 +25,33 @@ const (
 // Пороги И-11 (задание 23).
 const (
 	rerankK1        = 5
-	rerankOutEmpty  = 0.75 // доля вопросов вне базы, где фильтр оставил пусто
-	rerankMaxDrop   = 0.05 // падение recall filter против base на dev+test
-	rerankCalibDrop = 0.05 // MaxDrop калибровки
+	rerankOutEmpty  = 5.0 / 6 // доля вопросов вне базы, где фильтр оставил пусто (ТЗ: 5 из 6)
+	rerankMaxDrop   = 0.05    // падение recall filter против base на test
+	rerankCalibDrop = 0.05    // MaxDrop калибровки
 )
 
 // Rerank — И-11: «Фильтр и переписывание запроса».
 //
-// Часть A — без модели, как И-9: порог абсолютного пола калибруется на
-// dev+out (retrieve.Calibrate; в индекс не пишется — он в заметке), затем
-// матрица base / filter / rewrite / both при K1 = 5 на dev, test и out с
-// этим порогом (retrieve.RunMatrix). Жёсткие проверки:
+// Часть A — без модели, как И-9: порог абсолютного пола — тот, что записан
+// в индексе (kb calibrate -write), а если не записан — откалиброванный в
+// прогоне на dev+out (retrieve.Calibrate; в индекс не пишется); какой — в
+// заметке. Затем матрица base / filter / rewrite / both / hybrid при K1 = 5
+// на dev, test и out с этим порогом (retrieve.RunMatrix). Жёсткие проверки:
 //
 //  1. на вопросах вне базы (тип out-of-base: out и test) у filter после
-//     фильтра пусто не меньше чем в 75 % вопросов. Вопросы «аспекта нет»
+//     фильтра пусто не меньше чем в 5 из 6 (ТЗ). Вопросы «аспекта нет»
 //     (aspect-missing: вид в базе есть, нужного факта нет) в проверку не
 //     входят: о виде в базе есть статья, и фильтр релевантности обязан её
 //     оставить — «не знаю» там дело ответа (v24); их пустых — отчётное
 //     число;
-//  2. recall@5 после фильтра на dev+test падает против base не больше чем на
-//     0.05 — в вопросах не больше чем на 1 из 27;
+//  2. recall@5 поиска на test после фильтра падает против base не больше
+//     чем на 0.05 (ТЗ) — на 8 вопросах это ни одного; dev в проверку не
+//     входит (отчётное число). Провал — честный: в заметке, какие вопросы
+//     потеряны и почему (лучший косинус против порога и лучшего косинуса
+//     вопросов вне базы);
 //  3. rewrite поднимает «доказательство в топ-5» на вопросах synonym и
 //     followup (dev+test) хотя бы на один вопрос и ни на одном не ухудшает;
-//  4. both не хуже base по recall@5 на dev+test.
+//  4. both (rewrite code + filter) не хуже base по recall@5 на dev+test.
 //
 // Часть B — как часть A И-10: отвечающий агент на test в режимах rag и
 // rag+both (один повтор, судья) — только отчётные числа: верно, уверенные
@@ -76,7 +80,7 @@ func (t *Rerank) Title() string { return "Фильтр и переписыван
 // rerankChecks — жёсткие проверки части A.
 var rerankChecks = []string{
 	"filter: пусто на вопросах вне базы (out-of-base, K1 = 5)",
-	"filter: recall@5 на dev+test не ниже base больше чем на 0.05",
+	"filter: recall@5 на test не ниже base больше чем на 0.05",
 	"rewrite: доказательство в топ-5 на synonym и followup (dev+test)",
 	"both: recall@5 на dev+test не ниже base",
 }
@@ -85,10 +89,10 @@ func (t *Rerank) Run(ctx context.Context, s *Stand, r *Result) error {
 	r.Goal = "второй этап поиска: фильтр отсекает выдачу на вопросах вне базы и не теряет доказательств, переписывание находит синонимы и продолжения"
 	r.Mechanism = features.RAGFilter
 	r.Lanes = append(r.Lanes,
-		LaneInfo{Name: laneRetrieve, Note: "конвейер retrieve без модели: base, filter, rewrite, both при K1 = 5; порог — калибровка на dev+out",
+		LaneInfo{Name: laneRetrieve, Note: "конвейер retrieve без модели: base, filter, rewrite, both, hybrid при K1 = 5; порог — из индекса, иначе калибровка на dev+out",
 			Diff: "не диалог: поиск без модели"},
 		LaneInfo{Name: laneAnsRAG, Note: "отвечающий агент: прямой поиск, k = 5", Diff: "часть B: один запрос к модели"},
-		LaneInfo{Name: laneAnsBoth, Note: "тот же агент и промпт: выдача через конвейер (rewrite code, rerank hybrid, filter)",
+		LaneInfo{Name: laneAnsBoth, Note: "тот же агент и промпт: выдача через конвейер (rewrite code, filter)",
 			Diff: "+ rag.rewrite, rag.filter"})
 
 	qs, err := kb.LoadQuestions(orDefault(t.Questions, DefaultQuestions))
@@ -130,15 +134,26 @@ func (t *Rerank) Run(ctx context.Context, s *Stand, r *Result) error {
 		pending("калибровка не состоялась: " + err.Error())
 		return nil
 	}
-	r.note("Калибровка на dev+out (в индекс не записана): порог %.3f — recall на dev %.2f при %.2f без фильтра; лучший косинус вопросов вне базы до %.3f; якорные (назван вид корпуса, пол к ним не применяется): %s.",
-		cal.Chosen, rowAt(cal, cal.Chosen).DevRecall, cal.Base, maxOf(cal.OutTop), orDash(strings.Join(cal.Anchored, ", ")))
+	rule := "середина зазора"
+	if cal.Rule == retrieve.CalibMaxDrop {
+		rule = "max-drop: зазора нет"
+	}
+	r.note("Калибровка на dev+out (в индекс не записана): порог %.3f (%s) — recall на dev %.2f при %.2f без фильтра; лучший косинус вопросов вне базы без якоря %.3f, косинус доказательства неякорных dev от %.3f, зазор %+.3f, запас %+.3f / %+.3f; якорные (назван вид корпуса, пол к ним не применяется): %s.",
+		cal.Chosen, rule, cal.At.DevRecall, cal.Base, cal.OutMax, cal.EvidenceMin, cal.Gap, cal.MarginOut, cal.MarginDev, orDash(strings.Join(cal.Anchored, ", ")))
+	// Порог проверок — тот, что в продукте: из индекса, если записан, иначе
+	// откалиброванный в этом прогоне.
+	threshold, from := cal.Chosen, "откалиброван в прогоне (в индексе не записан)"
+	if ix, err := st.Index(ctx, cal.Index); err == nil && ix.MinScore > 0 {
+		threshold, from = ix.MinScore, "из индекса (kb calibrate -write)"
+	}
+	r.note("Порог проверок %.3f — %s.", threshold, from)
 	configs := retrieve.Presets(false)
 	for i := range configs {
 		if configs[i].Config.Filter {
-			configs[i].Config.MinScore = cal.Chosen
+			configs[i].Config.MinScore = threshold
 		}
 	}
-	s.env.logf("  И-11: матрица base/filter/rewrite/both, K1 = %d, dev/test/out", rerankK1)
+	s.env.logf("  И-11: матрица base/filter/rewrite/both/hybrid, K1 = %d, dev/test/out", rerankK1)
 	m, err := retrieve.RunMatrix(ctx, p, qs, configs, []int{rerankK1}, []string{kb.SplitDev, kb.SplitTest, kb.SplitOut})
 	if err != nil {
 		return fmt.Errorf("И-11: матрица: %w", err)
@@ -147,7 +162,7 @@ func (t *Rerank) Run(ctx context.Context, s *Stand, r *Result) error {
 		pending("поиск откатился на BM25 (" + m.Fallback + "): порог по косинусу не проверить")
 		return nil
 	}
-	t.judge(r, m)
+	t.judge(r, m, cal)
 	t.report(r, m)
 	if dir := s.Dir(); dir != "" {
 		if err := os.MkdirAll(dir, 0o755); err == nil {
@@ -165,7 +180,7 @@ func (t *Rerank) Run(ctx context.Context, s *Stand, r *Result) error {
 		return nil
 	}
 	a := &rag.Answerer{LLM: s.env.LLM, Model: s.env.Model, Searcher: p.Searcher, Pipeline: p,
-		Configs: map[rag.Mode]retrieve.Config{rag.RAGBoth: {MinScore: cal.Chosen}}}
+		Configs: map[rag.Mode]retrieve.Config{rag.RAGBoth: {MinScore: threshold}}}
 	s.env.logf("  И-11: test, rag и rag+both, судья")
 	rep, err := rag.Eval(ctx, a, qs, rag.EvalOptions{Splits: []string{kb.SplitTest}, Modes: []rag.Mode{rag.RAG, rag.RAGBoth},
 		Repeats: 1, Judge: &rag.Judge{LLM: s.env.LLM, Model: s.env.Model}, Seed: ragSeed,
@@ -187,24 +202,6 @@ func (t *Rerank) kbPath(s *Stand) string {
 		return s.env.KB
 	}
 	return DefaultCacheDB
-}
-
-// rowAt — строка калибровки с порогом.
-func rowAt(c retrieve.Calibration, th float64) retrieve.CalibRow {
-	for _, r := range c.Table {
-		if r.MinScore > th-1e-9 && r.MinScore < th+1e-9 {
-			return r
-		}
-	}
-	return retrieve.CalibRow{}
-}
-
-func maxOf(xs []float64) float64 {
-	m := 0.0
-	for _, x := range xs {
-		m = max(m, x)
-	}
-	return m
 }
 
 // mq — вопросы конфигурации при K1 = 5 на наборах.
@@ -257,7 +254,7 @@ func diff(a, b map[string]bool) []string {
 }
 
 // judge — жёсткие проверки части A.
-func (t *Rerank) judge(r *Result, m retrieve.Matrix) {
+func (t *Rerank) judge(r *Result, m retrieve.Matrix, cal retrieve.Calibration) {
 	all := []string{kb.SplitDev, kb.SplitTest, kb.SplitOut}
 	dt := []string{kb.SplitDev, kb.SplitTest}
 
@@ -278,7 +275,7 @@ func (t *Rerank) judge(r *Result, m retrieve.Matrix) {
 			}
 		}
 	}
-	c := Check{What: rerankChecks[0], Want: fmt.Sprintf("≥ %.0f %%", 100*rerankOutEmpty), Lane: laneRetrieve}
+	c := Check{What: rerankChecks[0], Want: fmt.Sprintf("≥ 5 из 6 (%.0f %%)", 100*rerankOutEmpty), Lane: laneRetrieve}
 	if len(outIDs) == 0 {
 		c.Status, c.Got, c.Note = Pending, "—", "в наборах нет вопросов out-of-base"
 	} else {
@@ -301,9 +298,10 @@ func (t *Rerank) judge(r *Result, m retrieve.Matrix) {
 	r.check(c)
 	r.metric("filter: пусто на вопросах «аспекта нет» (вид в базе есть; отчётно)", laneRetrieve, "%d из %d", aspectEmpty, aspect)
 
-	// 2. Recall filter против base.
-	base, filter := top5(mq(m, "base", dt...)), top5(mq(m, "filter", dt...))
-	n := answerableN(mq(m, "base", dt...))
+	// 2. Recall filter против base — на test (ТЗ); dev — отчётным числом.
+	testOnly := []string{kb.SplitTest}
+	base, filter := top5(mq(m, "base", testOnly...)), top5(mq(m, "filter", testOnly...))
+	n := answerableN(mq(m, "base", testOnly...))
 	allowed := int(rerankMaxDrop*float64(n) + 1e-9)
 	drop := len(base) - len(filter)
 	c = Check{What: rerankChecks[1], Want: fmt.Sprintf("падение ≤ %.2f (≤ %d из %d)", rerankMaxDrop, allowed, n), Lane: laneRetrieve,
@@ -314,9 +312,20 @@ func (t *Rerank) judge(r *Result, m retrieve.Matrix) {
 		c.Status = Fail
 	}
 	if lost := diff(base, filter); len(lost) > 0 {
-		c.Note = joinText(c.Note, "потеряны: "+strings.Join(lost, ", "))
+		var why []string
+		for _, id := range lost {
+			why = append(why, lostWhy(id, mq(m, "filter", testOnly...), m.MinScore, cal.OutMax))
+		}
+		c.Note = joinText(c.Note, "потеряны: "+strings.Join(why, "; "))
 	}
 	r.check(c)
+	devBase, devFilter := top5(mq(m, "base", kb.SplitDev)), top5(mq(m, "filter", kb.SplitDev))
+	devNote := ""
+	if lost := diff(devBase, devFilter); len(lost) > 0 {
+		devNote = "; потеряны: " + strings.Join(lost, ", ")
+	}
+	r.metric("filter: recall@5 на dev против base (отчётно)", laneRetrieve, "base %d, filter %d из %d%s",
+		len(devBase), len(devFilter), answerableN(mq(m, "base", kb.SplitDev)), devNote)
 
 	// 3. Rewrite на synonym и followup.
 	pick := func(rows []retrieve.MatrixQ) []retrieve.MatrixQ {
@@ -381,6 +390,9 @@ func (t *Rerank) report(r *Result, m retrieve.Matrix) {
 			r.metric(what+": пусто на неотвечаемых", lane, "%d из %d", int(row.OutEmpty*float64(row.OutN)+0.5), row.OutN)
 		}
 		r.metric(what+": отсечено, токенов на вопрос", lane, "%.0f %%, %.0f", 100*row.CutShare, row.Tokens)
+		if row.N > 0 && row.CutShare > 0 {
+			r.metric(what+": релевантных среди отсечённых, доказательство снято", lane, "%.2f, %.2f", row.WrongCut, row.LostQ)
+		}
 	}
 	for _, c := range m.Conclusion {
 		r.note("%s", c)
@@ -433,4 +445,28 @@ func joinText(a, b string) string {
 		return a
 	}
 	return a + "; " + b
+}
+
+// lostWhy — почему фильтр потерял вопрос: лучший косинус против порога и
+// лучшего косинуса вопросов вне базы, есть ли якорь.
+func lostWhy(id string, rows []retrieve.MatrixQ, floor, outMax float64) string {
+	for _, q := range rows {
+		if q.ID != id {
+			continue
+		}
+		s := fmt.Sprintf("%s — лучший косинус %.3f", id, q.TopDense)
+		switch {
+		case q.Anchored:
+			s += ", вид назван (пол не применялся): снял относительный порог или отсев повторов"
+		case q.TopDense < floor:
+			s += fmt.Sprintf(" ниже порога %.3f", floor)
+			if outMax > 0 {
+				s += fmt.Sprintf(" (вопросы вне базы — до %.3f: порог ниже их не опустить)", outMax)
+			}
+		default:
+			s += fmt.Sprintf(" не ниже порога %.3f: доказательство сняли относительный порог или отсев повторов", floor)
+		}
+		return s
+	}
+	return id
 }
