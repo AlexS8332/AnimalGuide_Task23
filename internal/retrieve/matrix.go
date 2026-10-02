@@ -14,16 +14,17 @@ import (
 )
 
 // Presets — матрица режимов задания 23: base (без фильтра и rewrite),
-// filter, rewrite (code), both (filter + rewrite + hybrid); дополнительные
-// платные строки llm-rewrite и llm-rerank — только по запросу.
+// filter, rewrite (code), both (rewrite code + filter), hybrid (rewrite
+// code + rerank hybrid + filter); дополнительные платные строки
+// llm-rewrite и llm-rerank — только по запросу.
 func Presets(paid bool) []Named {
 	out := []Named{
 		{Name: "base"},
 		{Name: "filter", Config: Config{Filter: true}},
 		{Name: "rewrite", Config: Config{Rewrite: RewriteCode}},
-		// both — переписывание и фильтр. Гибридный реранкинг отдельной
-		// строкой: на dev он не помог (+D02, −D06, −D16), поэтому в both его
-		// нет.
+		// both — переписывание и фильтр, без гибрида: на dev гибрид в both
+		// дал только −D16 (ранг 5 → 12) и MRR 0.63 → 0.53. Гибрид —
+		// отдельной строкой hybrid.
 		{Name: "both", Config: Config{Rewrite: RewriteCode, Filter: true}},
 		{Name: "hybrid", Config: Config{Rewrite: RewriteCode, Rerank: RerankHybrid, Filter: true}},
 	}
@@ -99,42 +100,54 @@ func relevant(c kb.Chunk, ev []evidence) bool {
 // unanswerable — вопрос без ответа в базе: out и answerable=false.
 func unanswerable(q kb.Question) bool { return q.Split == kb.SplitOut || !q.Answerable }
 
+// measured — числа вопроса для накопителя строки.
+type measured struct {
+	relHits int // итоговых фрагментов, покрывающих доказательство
+	cut     int // кандидатов, отсечённых фильтром
+	relCut  int // из них покрывающих доказательство
+}
+
 // measure — вопрос в строке матрицы при данном K1 (фильтр уже применён).
-func measure(q kb.Question, ev []evidence, t Trace) (MatrixQ, int, int) {
+func measure(q kb.Question, ev []evidence, t Trace) (MatrixQ, measured) {
 	row := MatrixQ{ID: q.ID, Type: q.Type, Kept: len(t.Hits), Empty: t.Empty,
-		Answerable: q.Answerable && len(ev) > 0, Unanswerable: unanswerable(q)}
+		Answerable: q.Answerable && len(ev) > 0, Unanswerable: unanswerable(q),
+		TopDense: round3(t.TopDense), Anchored: len(t.Anchored) > 0}
 	if t.Rewritten != "" && t.Rewritten != t.Original {
 		row.Rewritten = t.Rewritten
 	}
-	relHits := 0
+	var m measured
 	if row.Answerable {
 		for _, c := range t.Candidates {
 			if relevant(c.Chunk, ev) {
-				row.RankBefor = c.Final
-				break
+				if row.RankBefor == 0 {
+					row.RankBefor = c.Final
+				}
+				row.InDense = row.InDense || c.RankDense > 0
 			}
 		}
 		for i, h := range t.Hits {
 			if relevant(h.Chunk, ev) {
-				relHits++
+				m.relHits++
 				if row.RankAfter == 0 {
 					row.RankAfter = i + 1
 				}
 			}
 		}
 	}
-	cut := 0
 	for _, c := range t.Candidates {
 		if c.FilterCut() {
-			cut++
+			m.cut++
+			if row.Answerable && relevant(c.Chunk, ev) {
+				m.relCut++
+			}
 		}
 	}
-	return row, relHits, cut
+	return row, m
 }
 
-// wrongCut — доказательство было среди кандидатов, в итог не попало, и
+// lostByFilter — доказательство было среди кандидатов, в итог не попало, и
 // хотя бы один релевантный кандидат отсечён фильтром (а не K1).
-func wrongCut(ev []evidence, t Trace, row MatrixQ) bool {
+func lostByFilter(ev []evidence, t Trace, row MatrixQ) bool {
 	if !row.Answerable || row.RankBefor == 0 || row.RankAfter > 0 {
 		return false
 	}
@@ -148,15 +161,15 @@ func wrongCut(ev []evidence, t Trace, row MatrixQ) bool {
 
 // rowAcc — накопитель строки матрицы.
 type rowAcc struct {
-	row             MatrixRow
-	before, after   int
-	rr              float64
-	relHits, hits   int
-	cut, cands      int
-	wrong, outEmpty int
-	tokens, ms      float64
-	questions       int
-	costUSD         float64
+	row                 MatrixRow
+	inDense, before     int
+	after               int
+	rr, precision       float64
+	cut, cands          int
+	cutAns, relCut      int
+	lost, outEmpty      int
+	tokens, ms, costUSD float64
+	questions           int
 }
 
 // RunMatrix — матрица по конфигурациям × K1 × наборам. Поиск (с платными
@@ -233,20 +246,23 @@ func RunMatrix(ctx context.Context, p *Pipeline, qs kb.QuestionSet, configs []Na
 					tt.Config.K1 = k1
 					finish(&tt)
 					a := accs[key(nc.Name, sp, k1)]
-					row, relHits, cut := measure(q, e, tt)
-					row.Cut = wrongCut(e, tt, row)
+					row, mq := measure(q, e, tt)
+					row.Cut = lostByFilter(e, tt, row)
 					a.row.Rows = append(a.row.Rows, row)
 					a.questions++
 					a.ms += ms
 					// Платные шаги — один раз на вопрос: у каждого K1 та же цена.
 					a.costUSD += tt.Cost.USD
-					a.cut += cut
+					a.cut += mq.cut
 					a.cands += len(tt.Candidates)
 					for _, h := range tt.Hits {
 						a.tokens += float64(h.Tokens)
 					}
 					if row.Answerable {
 						a.row.N++
+						if row.InDense {
+							a.inDense++
+						}
 						if row.RankBefor > 0 {
 							a.before++
 						}
@@ -254,10 +270,14 @@ func RunMatrix(ctx context.Context, p *Pipeline, qs kb.QuestionSet, configs []Na
 							a.after++
 							a.rr += 1 / float64(row.RankAfter)
 						}
-						a.relHits += relHits
-						a.hits += len(tt.Hits)
+						// Пустой итог на отвечаемом вопросе — точность 0.
+						if len(tt.Hits) > 0 {
+							a.precision += float64(mq.relHits) / float64(len(tt.Hits))
+						}
+						a.cutAns += mq.cut
+						a.relCut += mq.relCut
 						if row.Cut {
-							a.wrong++
+							a.lost++
 						}
 					}
 					if row.Unanswerable {
@@ -275,14 +295,16 @@ func RunMatrix(ctx context.Context, p *Pipeline, qs kb.QuestionSet, configs []Na
 			for _, k1 := range k1s {
 				a := accs[key(nc.Name, sp, k1)]
 				r := a.row
-				r.RecallBefore = ratio(a.before, r.N)
+				r.RecallBefore = ratio(a.inDense, r.N)
+				r.RecallUnion = ratio(a.before, r.N)
 				r.RecallAfter = ratio(a.after, r.N)
 				if r.N > 0 {
 					r.MRR = a.rr / float64(r.N)
+					r.Precision = a.precision / float64(r.N)
 				}
-				r.Precision = ratio(a.relHits, a.hits)
 				r.CutShare = ratio(a.cut, a.cands)
-				r.WrongCut = ratio(a.wrong, r.N)
+				r.WrongCut = ratio(a.relCut, a.cutAns)
+				r.LostQ = ratio(a.lost, r.N)
 				r.OutEmpty = ratio(a.outEmpty, r.OutN)
 				if a.questions > 0 {
 					r.Tokens = a.tokens / float64(a.questions)
@@ -500,8 +522,11 @@ func (m Matrix) Markdown() string {
 		fmt.Fprintf(&b, "**Поиск шёл без векторов** (%s): %s.\n\n", m.Fallback, noteBM25)
 	}
 	b.WriteString("Метрики — поиск без модели: «доказательство» — фрагмент, покрывающий ≥ 80 % дословной цитаты-доказательства вопроса " +
-		"(то же правило, что в `kb eval` и `kb qa`). «До» — среди всех кандидатов после реранкинга, «после» — в итоговой выдаче K1, " +
-		"которую увидит модель. Неотвечаемые — `out` и `answerable=false` из других наборов: для них хорош пустой итог.\n\n")
+		"(то же правило, что в `kb eval` и `kb qa`). «Recall до» — доказательство в dense-выдаче K0 (как у base), «dense∪BM25» — среди всех кандидатов " +
+		"(dense и BM25 всех запросов), «после» — в итоговой выдаче K1, которую увидит модель. Precision — среднее по отвечаемым вопросам доли " +
+		"итоговых фрагментов с доказательством (пустой итог — 0). «Релевантных среди отсечённых» — доля фрагментов с доказательством среди " +
+		"отсечённых фильтром кандидатов отвечаемых вопросов; «доказательство снято» — доля вопросов, где фильтр снял доказательство, которое было " +
+		"среди кандидатов. Неотвечаемые — `out` и `answerable=false` из других наборов: для них хорош пустой итог.\n\n")
 	b.WriteString("## Вывод\n\n")
 	for _, c := range m.Conclusion {
 		b.WriteString("- " + c + "\n")
@@ -511,15 +536,16 @@ func (m Matrix) Markdown() string {
 		fmt.Fprintf(&b, "- `%s` — %s\n", nc.Name, nc.Config.Describe())
 	}
 	b.WriteString("\n## Матрица\n\n")
-	b.WriteString("| конфигурация | набор | K1 | N | recall до | recall после | MRR | precision | отсечено | ошибочно отсечено | пусто на неотвечаемых | токенов | мс | цена |\n")
-	b.WriteString("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
+	b.WriteString("| конфигурация | набор | K1 | N | recall до (dense K0) | dense∪BM25 | recall после | MRR | precision | отсечено | релевантных среди отсечённых | доказательство снято | пусто на неотвечаемых | токенов | мс | цена |\n")
+	b.WriteString("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
 	for _, r := range m.Rows {
 		out := "—"
 		if r.OutN > 0 {
 			out = fmt.Sprintf("%d из %d", int(math.Round(r.OutEmpty*float64(r.OutN))), r.OutN)
 		}
-		fmt.Fprintf(&b, "| `%s` | %s | %d | %d | %.2f | %.2f | %.2f | %.2f | %.0f %% | %.2f | %s | %.0f | %.0f | $%.4f |\n",
-			r.Name, r.Split, r.K1, r.N, r.RecallBefore, r.RecallAfter, r.MRR, r.Precision, 100*r.CutShare, r.WrongCut, out, r.Tokens, r.Millis, r.CostUSD)
+		fmt.Fprintf(&b, "| `%s` | %s | %d | %d | %.2f | %.2f | %.2f | %.2f | %.2f | %.0f %% | %.2f | %.2f | %s | %.0f | %.0f | $%.4f |\n",
+			r.Name, r.Split, r.K1, r.N, r.RecallBefore, r.RecallUnion, r.RecallAfter, r.MRR, r.Precision, 100*r.CutShare, r.WrongCut, r.LostQ, out,
+			r.Tokens, r.Millis, r.CostUSD)
 	}
 	k1 := DefaultK1
 	if len(m.Rows) > 0 {
@@ -529,24 +555,29 @@ func (m Matrix) Markdown() string {
 		}
 		k1 = headK1(ks)
 	}
-	for _, sp := range []string{kb.SplitTest, kb.SplitDev} {
+	for _, sp := range []string{kb.SplitTest, kb.SplitDev, kb.SplitOut} {
 		if len(m.questionsOf(m.Configs[0].Name, k1, sp)) == 0 {
 			continue
 		}
 		fmt.Fprintf(&b, "\n## Вопросы %s (K1 = %d)\n\n", sp, k1)
 		b.WriteString("Ранг доказательства: «до → после» (до — среди кандидатов после реранкинга, после — в итоге; «—» — нет; «отсечено» — релевантный кандидат снят фильтром, а не K1); " +
-			"«пусто» — фильтр отсёк всё. Переписанный запрос — первой конфигурации с переписыванием.\n\n")
-		b.WriteString("| id | тип |")
+			"«пусто» — фильтр отсёк всё. Лучший косинус — у запроса первой конфигурации (реплика как есть); «якорь» — в реплике назван вид, пол не применяется. " +
+			"Переписанный запрос — первой конфигурации с переписыванием.\n\n")
+		b.WriteString("| id | тип | лучший косинус |")
 		for _, nc := range m.Configs {
 			fmt.Fprintf(&b, " %s |", nc.Name)
 		}
-		b.WriteString(" переписанный запрос |\n|---|---|")
+		b.WriteString(" переписанный запрос |\n|---|---|---|")
 		for range m.Configs {
 			b.WriteString("---|")
 		}
 		b.WriteString("---|\n")
 		for _, q := range m.questionsOf(m.Configs[0].Name, k1, sp) {
-			fmt.Fprintf(&b, "| %s | %s |", q.ID, q.Type)
+			top := fmt.Sprintf("%.3f", q.TopDense)
+			if q.Anchored {
+				top += ", якорь"
+			}
+			fmt.Fprintf(&b, "| %s | %s | %s |", q.ID, q.Type, top)
 			rewritten := ""
 			for _, nc := range m.Configs {
 				x := findQ(m.questionsOf(nc.Name, k1, sp), q.ID)

@@ -56,7 +56,7 @@ func TestRunMatrixAndCalibrate(t *testing.T) {
 		if r.N != wantN || r.OutN != wantOut || len(r.Rows) != map[string]int{"dev": 19, "test": 10, "out": 8}[r.Split] {
 			t.Fatalf("%s %s %d: N %d, OutN %d, вопросов %d", r.Name, r.Split, r.K1, r.N, r.OutN, len(r.Rows))
 		}
-		if r.RecallAfter > r.RecallBefore+1e-9 || r.Precision > 1 || r.CutShare > 1 {
+		if r.RecallAfter > r.RecallUnion+1e-9 || r.RecallBefore > r.RecallUnion+1e-9 || r.Precision > 1 || r.CutShare > 1 || r.WrongCut > 1 || r.LostQ > 1 {
 			t.Fatalf("%s %s: метрики %+v", r.Name, r.Split, r)
 		}
 		if (r.Name == "base" || r.Name == "rewrite") && (r.CutShare != 0 || r.OutEmpty != 0) {
@@ -167,5 +167,30 @@ func TestConclude(t *testing.T) {
 		if !strings.Contains(got, want) {
 			t.Errorf("нет строки:\n%s\nв выводе:\n%s", want, got)
 		}
+	}
+}
+
+// TestMeasure — метрики вопроса: доказательство только в BM25 (не в dense
+// K0), снято фильтром — релевантный среди отсечённых и «доказательство
+// снято».
+func TestMeasure(t *testing.T) {
+	ev := []evidence{{doc: "a", s: 0, e: 10}}
+	q := kb.Question{ID: "D1", Type: "fact", Split: kb.SplitDev, Answerable: true}
+	tr := Trace{Info: kb.SearchInfo{Mode: kb.Dense}, TopDense: 0.9, Anchored: []string{"x"}, Candidates: []Candidate{
+		{Hit: kb.Hit{Chunk: kb.Chunk{ID: "b", DocID: "b", Start: 0, End: 50}}, Dense: 0.9, RankDense: 1, Final: 1, Kept: true},
+		{Hit: kb.Hit{Chunk: kb.Chunk{ID: "a", DocID: "a", Start: 0, End: 20}}, Dense: 0.7, RankBM25: 1, Final: 2, Reason: "хуже лучшего на 0.05"},
+		{Hit: kb.Hit{Chunk: kb.Chunk{ID: "c", DocID: "c", Start: 0, End: 20}}, Dense: 0.6, RankDense: 2, Final: 3, Reason: "порог 0.800"},
+	}}
+	tr.Hits = []kb.Hit{tr.Candidates[0].Hit}
+	row, m := measure(q, ev, tr)
+	if row.InDense || row.RankBefor != 2 || row.RankAfter != 0 || m.cut != 2 || m.relCut != 1 || m.relHits != 0 || !row.Anchored || row.TopDense != 0.9 {
+		t.Fatalf("measure: %+v %+v", row, m)
+	}
+	if !lostByFilter(ev, tr, row) {
+		t.Fatal("доказательство снято фильтром, а не отмечено")
+	}
+	tr.Candidates[1].Reason = ReasonBeyond
+	if lostByFilter(ev, tr, row) {
+		t.Fatal("ушло за K1 — не снято фильтром")
 	}
 }

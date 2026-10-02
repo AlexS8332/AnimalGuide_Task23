@@ -171,3 +171,46 @@ func TestRelativePerQuery(t *testing.T) {
 		t.Fatalf("общий лучший: %+v", y.Candidates)
 	}
 }
+
+// TestCalibrateGap — порог — середина зазора между лучшим косинусом вопроса
+// вне базы и косинусом доказательства неякорного dev; якорные вопросы в
+// зазор не входят; без зазора — прежнее правило с предупреждением.
+func TestCalibrateGap(t *testing.T) {
+	ctx := context.Background()
+	p := topicPipeline(t)
+	dev := kb.Question{ID: "D1", Split: kb.SplitDev, Type: "fact", Q: "Где в Приморье водится эта куница?", Answerable: true,
+		Evidence: []kb.Evidence{{DocID: "harza", Quote: "Харза водится в России в Приморье."}}}
+	anchored := kb.Question{ID: "D2", Split: kb.SplitDev, Type: "number", Q: "Сколько весит манул?", Answerable: true,
+		Evidence: []kb.Evidence{{DocID: "manul", Quote: "Манул весит до пяти кг."}}}
+	out := kb.Question{ID: "O1", Split: kb.SplitOut, Type: "out-of-base", Q: "Сколько весит жираф?"}
+	test := kb.Question{ID: "T1", Split: kb.SplitTest, Type: "fact", Q: "Где обитает эта куница?", Answerable: true}
+	cal, err := Calibrate(ctx, p, kb.QuestionSet{Questions: []kb.Question{dev, anchored, out, test}}, "", 0, 0.05, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cal.Rule != CalibGap || cal.OutMaxID != "O1" || cal.EvidenceMinID != "D1" || cal.Gap <= 0 ||
+		math.Abs(cal.Chosen-(cal.OutMax+cal.EvidenceMin)/2) > 1e-4 || math.Abs(cal.MarginOut-cal.MarginDev) > 2e-4 || cal.MarginOut <= 0 {
+		t.Fatalf("зазор: %+v", cal)
+	}
+	if strings.Join(cal.FloorDev, ",") != "D1" || strings.Join(cal.FloorOut, ",") != "O1" || strings.Join(cal.FloorTest, ",") != "T1" ||
+		strings.Join(cal.Anchored, ",") != "D2" || cal.At.DevRecall != 1 || cal.At.OutEmpty != 1 || cal.Note != "" {
+		t.Fatalf("чувствительные к полу: %+v", cal)
+	}
+	md := cal.Markdown()
+	for _, want := range []string{"середина зазора", "## Зазор", "dev 1 из 2 (D1)", "out 1 из 1 (O1)", "test 1 (T1)", "запас до вопросов вне базы +"} {
+		if !strings.Contains(md, want) {
+			t.Errorf("в отчёте нет %q:\n%s", want, md)
+		}
+	}
+
+	// Вопрос вне базы ближе доказательства — зазора нет: max-drop и
+	// предупреждение.
+	near := kb.Question{ID: "O2", Split: kb.SplitOut, Type: "out-of-base", Q: "Где это водится в России?"}
+	cal, err = Calibrate(ctx, p, kb.QuestionSet{Questions: []kb.Question{dev, near}}, "", 0, 0.05, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cal.Rule != CalibMaxDrop || cal.Gap > 0 || !strings.Contains(cal.Note, "зазора нет") || !strings.Contains(cal.Markdown(), "**Внимание:**") {
+		t.Fatalf("без зазора: %+v", cal)
+	}
+}
