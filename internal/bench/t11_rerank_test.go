@@ -1,12 +1,14 @@
 package bench
 
 import (
+	"context"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/embed"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/features"
+	"github.com/AlexS8332/AnimalGuide_Task23/internal/kb"
 )
 
 // TestRerankTrial — И-11 на настоящем корпусе, hash-эмбеддере и
@@ -29,7 +31,7 @@ func TestRerankTrial(t *testing.T) {
 	if c := find(t, res, rerankChecks[0], ""); !strings.Contains(c.Got, "из 7") {
 		t.Errorf("вопросы вне базы — 6 out и T10: %+v", c)
 	}
-	if c := find(t, res, rerankChecks[1], ""); !strings.Contains(c.Want, "≤ 1 из 27") {
+	if c := find(t, res, rerankChecks[1], ""); !strings.Contains(c.Want, "≤ 0 из 8") {
 		t.Errorf("допуск падения: %+v", c)
 	}
 	if metric(res, "filter: пусто на вопросах «аспекта нет» (вид в базе есть; отчётно)", laneRetrieve) == "" {
@@ -41,7 +43,7 @@ func TestRerankTrial(t *testing.T) {
 		}
 	}
 	notes := strings.Join(res.Notes, "\n")
-	if !strings.Contains(notes, "Калибровка на dev+out (в индекс не записана): порог") {
+	if !strings.Contains(notes, "Калибровка на dev+out (в индекс не записана): порог") || !strings.Contains(notes, "откалиброван в прогоне") {
 		t.Errorf("заметки: %s", notes)
 	}
 }
@@ -56,10 +58,21 @@ func TestRerankTrialPending(t *testing.T) {
 		}
 	}
 
-	// Без модели — только часть A, с заметкой о пропуске части B.
-	tr = &Rerank{KBPath: ragKB(t), Questions: "../../eval/questions.json", Embedder: embed.Hash{}}
+	// Без модели — только часть A, с заметкой о пропуске части B; порог
+	// записан в индекс — проверки идут с ним.
+	path := ragKB(t)
+	st, err := kb.Open(context.Background(), path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := st.SetMinScore(context.Background(), "structure", 0.5); err != nil {
+		t.Fatal(err)
+	}
+	st.Close()
+	tr = &Rerank{KBPath: path, Questions: "../../eval/questions.json", Embedder: embed.Hash{}}
 	res = r.run(t, tr)
-	if !strings.Contains(strings.Join(res.Notes, "\n"), "Часть B (ответы rag и rag+both) пропущена") {
+	notes := strings.Join(res.Notes, "\n")
+	if !strings.Contains(notes, "Часть B (ответы rag и rag+both) пропущена") || !strings.Contains(notes, "Порог проверок 0.500 — из индекса") {
 		t.Errorf("заметки без модели: %v", res.Notes)
 	}
 }

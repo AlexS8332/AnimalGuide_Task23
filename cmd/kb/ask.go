@@ -72,6 +72,13 @@ func runAsk(ctx context.Context, args []string, out, errOut io.Writer) int {
 			if t := ans.Trace; t != nil && t.Rewritten != t.Original {
 				fmt.Fprintf(out, "Запрос в поиск: %s\n", t.Rewritten)
 			}
+			if t := ans.Trace; t != nil && t.Config.Filter && t.MinScoreFrom != "" {
+				anchor := "якоря нет — пол действует"
+				if len(t.Anchored) > 0 {
+					anchor = "вид назван в запросе (" + strings.Join(t.Anchored, ", ") + ") — пол не применяется"
+				}
+				fmt.Fprintf(out, "Порог %.3f (%s); лучший косинус %.3f, отрыв %.3f; %s\n", t.MinScore, t.MinScoreFrom, t.TopDense, t.Gap, anchor)
+			}
 			line := fmt.Sprintf("Найдено (%s, %s", ans.Search.Index, ans.Search.Mode)
 			if ans.Search.Embedder != "" {
 				line += " " + ans.Search.Embedder

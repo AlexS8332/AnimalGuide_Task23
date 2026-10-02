@@ -58,14 +58,22 @@ func (e *edgeRetrieve) trace(ctx context.Context, q retrieve.Query, c retrieve.C
 	if c.Delta > 0 {
 		delta = c.Delta
 	}
-	tr := retrieve.Trace{Original: q.Text, Rewritten: q.Text, Config: c, MinScore: minScore}
+	tr := retrieve.Trace{Original: q.Text, Rewritten: q.Text, Config: c, MinScore: minScore, MinScoreFrom: retrieve.MinScoreDefault}
+	if c.MinScore > 0 {
+		tr.MinScoreFrom = retrieve.MinScoreConfig
+	}
 	low := strings.ToLower(q.Text)
+	// Вид назван в реплике (якорь): пол к запросу не применяется.
+	if strings.Contains(low, "манул") {
+		tr.Anchored = []string{"манул"}
+	}
 	if c.Rewrite != retrieve.RewriteNone {
 		tr.RewriteBy = string(c.Rewrite)
 		switch {
 		case strings.Contains(low, "кошачий медвед") || strings.Contains(low, "кошачьего медвед"):
-			tr.Rewritten = q.Text + " малая панда Ailurus fulgens"
-			tr.Expanded = []string{"кошачий медведь → малая панда", "малая панда → Ailurus fulgens"}
+			tr.Rewritten = q.Text + " малая панда"
+			tr.QueriesBM25 = []string{tr.Rewritten + " Ailurus fulgens"}
+			tr.Expanded = []string{"кошачий медведь → малая панда"}
 		case strings.Contains(low, "ксенофоб"):
 			tr.Rewritten = q.Text + ` <b>проверочный зверёк</b>`
 			tr.Expanded = []string{`<i>ксенофоб</i> → <b>проверочный зверёк</b> <img src=x onerror="window.__xss=46">`}
@@ -145,12 +153,12 @@ func (e *edgeRetrieve) trace(ctx context.Context, q retrieve.Query, c retrieve.C
 		x.Final = i + 1
 		section := x.DocID + "|" + strings.Join(x.Path, "/")
 		switch {
-		case c.Filter && x.Dense < minScore:
+		case c.Filter && len(tr.Anchored) == 0 && x.Dense < minScore:
 			x.Reason = fmt.Sprintf("порог %.2f", minScore)
 		case c.Filter && x.Dense < top-delta:
 			x.Reason = fmt.Sprintf("хуже лучшего на %.2f", delta)
 		case c.Filter && sections[section]:
-			x.Reason = "повтор раздела"
+			x.Reason = "повтор текста"
 		case kept >= c.K1:
 			x.Reason = "за пределами K1"
 		default:
@@ -164,6 +172,13 @@ func (e *edgeRetrieve) trace(ctx context.Context, q retrieve.Query, c retrieve.C
 	}
 	tr.Candidates = cands
 	tr.TopDense = top
+	second := 0.0
+	for _, x := range cands {
+		if x.Dense < top && x.Dense > second {
+			second = x.Dense
+		}
+	}
+	tr.Gap = top - second
 	tr.Empty = c.Filter && kept == 0
 	tr.Info = kb.SearchInfo{Index: c.Index, Mode: kb.Dense, Embedder: "hash-256", Millis: 23.4}
 	tr.Millis = time.Since(started).Milliseconds() + 31
@@ -183,7 +198,7 @@ func edgeModeConfig(m rag.Mode) retrieve.Config {
 	case rag.RAGRewrite:
 		c.Rewrite = retrieve.RewriteCode
 	case rag.RAGBoth:
-		c.Rewrite, c.Rerank, c.Filter = retrieve.RewriteCode, retrieve.RerankHybrid, true
+		c.Rewrite, c.Filter = retrieve.RewriteCode, true
 	}
 	return c
 }
@@ -200,7 +215,7 @@ func edgeMatrix() retrieve.Matrix {
 		{"base", retrieve.Config{}, base{0.90, 0.80, 0.62, 0.34, 0, 0, 0, 1450, 41}},
 		{"filter", retrieve.Config{Filter: true}, base{0.90, 0.80, 0.66, 0.52, 0.58, 0, 0.67, 830, 43}},
 		{"rewrite", retrieve.Config{Rewrite: retrieve.RewriteCode}, base{1.00, 0.90, 0.71, 0.40, 0, 0, 0, 1470, 44}},
-		{"both", retrieve.Config{Rewrite: retrieve.RewriteCode, Rerank: retrieve.RerankHybrid, Filter: true}, base{1.00, 0.90, 0.78, 0.61, 0.66, 0, 0.83, 760, 47}},
+		{"both", retrieve.Config{Rewrite: retrieve.RewriteCode, Filter: true}, base{1.00, 0.90, 0.78, 0.61, 0.66, 0, 0.83, 760, 47}},
 	}
 	m := retrieve.Matrix{Created: time.Date(2026, 10, 1, 18, 40, 0, 0, time.Local), CorpusSHA: "6f1c2d9e8a7b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d",
 		Embedder: "intfloat/multilingual-e5-base", Index: "structure", MinScore: 0.815, Delta: 0.05}
@@ -223,11 +238,12 @@ func edgeMatrix() retrieve.Matrix {
 						r.N = 20
 					}
 					r.RecallBefore = b.before
+					r.RecallUnion = b.before
 					r.RecallAfter = clamp01(b.after + kf)
 					r.MRR = clamp01(b.mrr + kf/2)
 					r.Precision = clamp01(b.prec - kf*1.5)
 					if p.c.Filter && k1 == 3 {
-						r.WrongCut = 0.05
+						r.WrongCut, r.LostQ = 0.02, 0.05
 					}
 				}
 				m.Rows = append(m.Rows, r)
@@ -235,7 +251,7 @@ func edgeMatrix() retrieve.Matrix {
 		}
 	}
 	m.Conclusion = []string{
-		"both (rewrite + гибрид + фильтр) при K1 = 5: recall на test 0,90 против 0,80 у base, precision 0,61 против 0,34.",
+		"both (rewrite + фильтр) при K1 = 5: recall на test 0,90 против 0,80 у base, precision 0,61 против 0,34.",
 		"Фильтр отсекает 66 % кандидатов, доказательство ошибочно не отсечено ни разу на test при K1 ≥ 5.",
 		"На out после фильтра пусто в 5 из 6 вопросов (И-11: не меньше 5 из 6) — у base ни в одном.",
 		"rewrite поднимает recall@5 на вопросах с синонимами: T07 «кошачий медведь» — доказательство с 7-го места на 1-е.",
@@ -265,6 +281,9 @@ func clamp01(f float64) float64 {
 // 0,780–0,850 с шагом 0,005, выбран 0,815 (recall dev падает на 0,05).
 func edgeCalibration() retrieve.Calibration {
 	cal := retrieve.Calibration{Index: "structure", Embedder: "intfloat/multilingual-e5-base", Delta: 0.05, MaxDrop: 0.05, Base: 1, Chosen: 0.815,
+		Rule: retrieve.CalibMaxDrop, OutMax: 0.823, OutMaxID: "O05", EvidenceMin: 0.812, EvidenceMinID: "D12", Gap: -0.011, MarginOut: -0.008, MarginDev: -0.003,
+		FloorDev: []string{"D07", "D12"}, FloorOut: []string{"O01", "O02", "O05"}, FloorTest: []string{"T06", "T08"},
+		Note:   "зазора нет: лучший косинус вопроса вне базы 0.823 (O05) не ниже косинуса доказательства неякорного dev 0.812 (D12)",
 		DevTop: []float64{0.889, 0.884, 0.879, 0.876, 0.871, 0.868, 0.866, 0.861, 0.858, 0.853, 0.851, 0.847, 0.843, 0.838, 0.836, 0.831, 0.827, 0.822, 0.818, 0.812},
 		OutTop: []float64{0.771, 0.784, 0.789, 0.797, 0.806, 0.823}}
 	for i := 0; i <= 14; i++ {

@@ -44,7 +44,7 @@ const (
 	// промпт те же, что у RAG: отличается только, какие фрагменты дошли.
 	RAGFilter  Mode = "rag+filter"  // фильтр релевантности и отсев дублей
 	RAGRewrite Mode = "rag+rewrite" // переписывание запроса кодом (синонимы, контекст)
-	RAGBoth    Mode = "rag+both"    // переписывание + гибридный реранкинг + фильтр
+	RAGBoth    Mode = "rag+both"    // переписывание кодом + фильтр
 )
 
 // Pipelined — режим идёт через конвейер retrieve (а не прямой поиск).
@@ -105,8 +105,10 @@ type Answerer struct {
 }
 
 // ModeConfig — настройки конвейера по умолчанию для режима v23: filter —
-// только фильтр, rewrite — только переписывание кодом, both — переписывание,
-// гибридный реранкинг и фильтр. У остальных режимов — пустые.
+// только фильтр, rewrite — только переписывание кодом, both — переписывание
+// кодом и фильтр. У остальных режимов — пустые. Порог (MinScore) здесь не
+// задаётся: конвейер берёт его из индекса (kb calibrate -write), иначе —
+// retrieve.DefaultMinScore (retrieve.MinScoreOf).
 func ModeConfig(m Mode) retrieve.Config {
 	switch m {
 	case RAGFilter:
@@ -114,10 +116,10 @@ func ModeConfig(m Mode) retrieve.Config {
 	case RAGRewrite:
 		return retrieve.Config{Rewrite: retrieve.RewriteCode}
 	case RAGBoth:
-		// Без гибридного реранкинга: на dev RRF dense и BM25 дал +D02, но
-		// потерял D06 и D16 (матрица v23, examples/rag/filter.md) — пользы
-		// нет, а порядок кандидатов он портит. Гибрид — отдельная строка
-		// матрицы (retrieve.Presets «hybrid»).
+		// Без гибридного реранкинга: на dev гибрид в both дал только −D16
+		// (ранг 5 → 12) и MRR 0.63 → 0.53 (матрица v23,
+		// examples/rag/filter.md). Гибрид — отдельная строка матрицы
+		// (retrieve.Presets «hybrid»).
 		return retrieve.Config{Rewrite: retrieve.RewriteCode, Filter: true}
 	}
 	return retrieve.Config{}

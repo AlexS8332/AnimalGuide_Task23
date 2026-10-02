@@ -19,7 +19,7 @@ import (
 
 func init() {
 	register("calibrate", "подобрать порог релевантности на dev+out: таблица «порог → recall dev, пусто на out» (в индекс — только с -write)", runCalibrate)
-	register("matrix", "сравнить режимы поиска base/filter/rewrite/both × K1 × наборы → examples/rag/filter.md (и JSON)", runMatrix)
+	register("matrix", "сравнить режимы поиска base/filter/rewrite/both/hybrid × K1 × наборы → examples/rag/filter.md (и JSON)", runMatrix)
 }
 
 // Отчёты в репозитории.
@@ -94,8 +94,15 @@ func printTrace(out io.Writer, t retrieve.Trace, all bool) {
 	for _, e := range t.Expanded {
 		fmt.Fprintf(out, "раскрыто: %s\n", e)
 	}
+	if len(t.QueriesBM25) > 0 {
+		fmt.Fprintf(out, "в BM25: %s\n", strings.Join(t.QueriesBM25, " | "))
+	}
 	if t.Config.Filter && t.Info.Mode == kb.Dense {
-		fmt.Fprintf(out, "порог %.3f, лучший косинус %.3f, «не хуже лучшего на %.2f» → %.3f\n", t.MinScore, t.TopDense, t.Config.Delta, t.TopDense-t.Config.Delta)
+		floor := fmt.Sprintf("порог %.3f (%s)", t.MinScore, orDash(t.MinScoreFrom))
+		if len(t.Anchored) > 0 {
+			floor += " не применяется: вид назван в запросе (" + strings.Join(t.Anchored, ", ") + ")"
+		}
+		fmt.Fprintf(out, "%s, лучший косинус %.3f, отрыв от второго %.3f, «не хуже лучшего на %.2f» → %.3f\n", floor, t.TopDense, t.Gap, t.Config.Delta, t.TopDense-t.Config.Delta)
 	}
 	if t.Note != "" {
 		fmt.Fprintf(out, "заметка: %s\n", t.Note)

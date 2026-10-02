@@ -84,9 +84,11 @@ func TestSearchRewriteCode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(tr.Rewritten, "малая панда Ailurus fulgens") || tr.RewriteBy != "code" ||
-		len(tr.Expanded) != 1 || tr.Expanded[0] != "кошачий медведь → малая панда" || len(tr.Queries) != 1 || tr.Queries[0] != tr.Rewritten {
-		t.Fatalf("переписывание: %+v", tr)
+	// Dense — реплика и канон, без латыни; латынь — только в BM25.
+	if !strings.HasSuffix(tr.Rewritten, "? малая панда") || tr.RewriteBy != "code" ||
+		len(tr.Expanded) != 1 || tr.Expanded[0] != "кошачий медведь → малая панда" || len(tr.Queries) != 1 || tr.Queries[0] != tr.Rewritten ||
+		len(tr.QueriesBM25) != 1 || tr.QueriesBM25[0] != tr.Rewritten+" Ailurus fulgens" {
+		t.Fatalf("переписывание: %q %q %v", tr.Rewritten, tr.QueriesBM25, tr.Expanded)
 	}
 	if strings.Join(tr.Anchored, ",") != "малая панда" {
 		t.Fatalf("якорь: %v", tr.Anchored)
@@ -115,21 +117,47 @@ func TestSearchRewriteCode(t *testing.T) {
 		t.Fatal("нет лучшего косинуса")
 	}
 
-	// Продолжение: вид — из последней реплики, где он назван.
+	// Канон в реплике — dense-запрос не меняется, латынь — в BM25.
+	tr, err = p.Search(ctx, Query{Text: "Сколько весит корсак?"}, Config{Rewrite: RewriteCode})
+	if err != nil || tr.Rewritten != tr.Original || tr.Queries[0] != tr.Original || tr.QueriesBM25[0] != "Сколько весит корсак? Vulpes corsac" {
+		t.Fatalf("канон: %q %q %v", tr.Queries, tr.QueriesBM25, err)
+	}
+
+	// Продолжение: прошлая реплика, где назван вид (последняя), и текущая;
+	// вид из контекста — не якорь.
 	tr, err = p.Search(ctx, Query{Text: "А сколько он весит?", Context: []string{"Чем питается малая панда?", "Где живёт корсак?"}},
 		Config{Rewrite: RewriteCode})
-	if err != nil || tr.Rewritten != "А сколько он весит? корсак Vulpes corsac" || !strings.Contains(strings.Join(tr.Expanded, ";"), "вид из контекста → корсак") {
-		t.Fatalf("продолжение: %q %v %v", tr.Rewritten, tr.Expanded, err)
+	if err != nil || tr.Rewritten != "Где живёт корсак? А сколько он весит?" || tr.QueriesBM25[0] != "Где живёт корсак? Vulpes corsac А сколько он весит?" ||
+		!strings.Contains(strings.Join(tr.Expanded, ";"), "вид из контекста → корсак") || len(tr.Anchored) != 0 {
+		t.Fatalf("продолжение: %q %q %v %v %v", tr.Rewritten, tr.QueriesBM25, tr.Expanded, tr.Anchored, err)
+	}
+	// Синоним в прошлой реплике раскрывается и там.
+	tr, _ = p.Search(ctx, Query{Text: "А она где живёт?", Context: []string{"Что ест кошачий медведь?"}}, Config{Rewrite: RewriteCode})
+	if tr.Rewritten != "Что ест кошачий медведь? малая панда А она где живёт?" {
+		t.Fatalf("продолжение с синонимом: %q", tr.Rewritten)
+	}
+	// Самостоятельная реплика (вид назван или названо другое животное) —
+	// контекст не учитывается.
+	for _, q := range []Query{
+		{Text: "Сколько весит взрослый жираф?", Context: []string{"Где живёт корсак?"}},
+		{Text: "Где живёт малая панда?", Context: []string{"Сколько весит корсак?"}},
+		{Text: "Чем питаются хищники в степях Азии и Гималаях?", Context: []string{"Где живёт корсак?"}},
+	} {
+		tr, err = p.Search(ctx, q, Config{Rewrite: RewriteCode})
+		if err != nil || strings.Contains(tr.Rewritten, "корсак") || tr.Note != "" {
+			t.Fatalf("самостоятельная %q: %q %q %v", q.Text, tr.Rewritten, tr.Note, err)
+		}
 	}
 	// Вида в контексте нет — запрос как без переписывания, с заметкой.
 	tr, err = p.Search(ctx, Query{Text: "А сколько их?", Context: []string{"Расскажи про хищных"}}, Config{Rewrite: RewriteCode})
 	if err != nil || tr.Rewritten != "Расскажи про хищных А сколько их?" || !strings.Contains(tr.Note, "вид в контексте не назван") {
 		t.Fatalf("без вида: %q %q %v", tr.Rewritten, tr.Note, err)
 	}
-	// Без переписывания: контекст и вопрос (как режим rag), Rewritten = исходный.
-	tr, err = p.Search(ctx, Query{Text: "А сколько он весит?", Context: []string{"Где живёт корсак?"}}, Config{})
-	if err != nil || tr.Rewritten != tr.Original || tr.Queries[0] != "Где живёт корсак? А сколько он весит?" || tr.RewriteBy != "" {
-		t.Fatalf("base: %+v %v", tr, err)
+	// Без переписывания контекст в запрос не идёт: только реплика.
+	tr, err = p.Search(ctx, Query{Text: "А сколько он весит?", Context: []string{"Где живёт корсак?"}}, Config{Filter: true})
+	if err != nil || tr.Rewritten != tr.Original || len(tr.Queries) != 1 || tr.Queries[0] != "А сколько он весит?" || tr.QueriesBM25 != nil ||
+		tr.RewriteBy != "" || len(tr.Anchored) != 0 {
+		t.Fatalf("base: %q %q %v %v", tr.Queries, tr.QueriesBM25, tr.Anchored, err)
 	}
 }
 
@@ -435,9 +463,10 @@ func TestRewriteLLM(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if tr.RewriteBy != "llm" || len(tr.Queries) != 4 || !strings.Contains(tr.Queries[0], "малая панда Ailurus fulgens") ||
-		tr.Rewritten != tr.Queries[0] || len(tr.Expanded) != 1 || tr.Usage.Total == 0 || !tr.Cost.Known {
-		t.Fatalf("llm: %+v", tr)
+	if tr.RewriteBy != "llm" || len(tr.Queries) != 4 || !strings.HasSuffix(tr.Queries[0], "кошачий медведь малая панда") ||
+		len(tr.QueriesBM25) != 4 || tr.QueriesBM25[0] != tr.Queries[0]+" Ailurus fulgens" || tr.QueriesBM25[3] != "b" ||
+		tr.Rewritten != tr.Queries[0] || len(tr.Expanded) != 1 || tr.Usage.Total == 0 || !tr.Cost.Known || len(tr.Anchored) != 0 {
+		t.Fatalf("llm: %q %q %v", tr.Queries, tr.QueriesBM25, tr.Anchored)
 	}
 	user := fake.Requests[0].Messages[1].Content
 	if !strings.Contains(user, "Предыдущие реплики пользователя:\n- Расскажи про кошачьего медведя") || !strings.HasSuffix(user, "Вопрос: А сколько она ест?") ||

@@ -115,15 +115,19 @@ func SearchTool(s *kb.Searcher, index string, k int) tools.Tool {
 
 // PipelineTool — kb_search через конвейер retrieve (механизмы rag.filter и
 // rag.rewrite, v23): та же схема и то же описание, что у SearchTool, а
-// выдача — итог конвейера с настройками c (K1 — k вызова). Context —
+// выдача — итог конвейера с настройками c (K1 — k вызова). history —
 // прошлые реплики человека: по ним rewrite находит вид для вопроса-
 // продолжения («а сколько она весит?»), и вызов моделью получает тот же
-// контекст, что вызов кодом. Ответ — кратко: переписанный запрос (если
-// переписан), сколько отсечено фильтром и заметка; полный путь поиска — в
-// окне «База знаний».
+// контекст, что вызов кодом. Без переписывания контекст не нужен и в
+// конвейер не идёт: склейка с прошлыми репликами тянула бы поиск к прошлой
+// теме. Ответ — кратко: переписанный запрос (если переписан), сколько
+// отсечено фильтром и заметка; полный путь поиска — в окне «База знаний».
 func PipelineTool(p *retrieve.Pipeline, c retrieve.Config, history []string, k int) tools.Tool {
 	k = orK(k)
 	c.Index = orIndex(c.Index)
+	if c.Rewrite == retrieve.RewriteNone {
+		history = nil
+	}
 	return tools.Func{
 		S: tools.Spec{Name: ToolName, Description: searchDescription, Parameters: json.RawMessage(searchSchema),
 			Untrusted: true, Via: tools.ViaLocal},

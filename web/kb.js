@@ -477,7 +477,7 @@ function kbSearchHTML() {
         <select id="kb-rewrite">${opt(kbRewriteText, f.rewrite)}</select>
         <label class="lbl" for="kb-rerank">реранкинг</label>
         <select id="kb-rerank">${opt(kbRerankText, f.rerank)}</select>
-        <label class="kb-check" title="абсолютный порог косинуса, «не хуже лучшего на Δ» и один фрагмент на раздел"><input type="checkbox" id="kb-filter"${f.filter ? ' checked' : ''}> фильтр релевантности</label>
+        <label class="kb-check" title="абсолютный порог косинуса, «не хуже лучшего на Δ» и отсев повторов текста"><input type="checkbox" id="kb-filter"${f.filter ? ' checked' : ''}> фильтр релевантности</label>
         <label class="lbl" for="kb-k0">K0</label>
         <select id="kb-k0">${k0s.map(k => `<option value="${k}"${k === f.k0 ? ' selected' : ''}>${k}</option>`).join('')}</select>
         <input type="text" id="kb-ctx" class="kb-ctx" value="${esc(f.ctx)}" placeholder="предыдущий вопрос — для продолжения «а сколько она весит?»" maxlength="500">
@@ -549,6 +549,7 @@ function kbTraceQueryHTML(t) {
       <div class="kb-tr-text" id="kb-rewritten">${kbRewrittenHTML(orig, rw)}</div>
       ${kbList(t.expanded).length ? `<div class="kb-tr-exp">${t.expanded.map(e => `<span class="chip kb-expanded">${esc(e)}</span>`).join('')}</div>` : ''}
       ${qs.length ? `<div class="kb-tr-subq hint">подзапросы: ${qs.map(x => `<q>${esc(x)}</q>`).join(' · ')}</div>` : ''}
+      ${kbList(t.queries_bm25).length ? `<div class="kb-tr-subq hint" id="kb-bm25q" title="латынь вида идёт только в BM25: dense от неё сбивается">в BM25: ${t.queries_bm25.map(x => `<q>${esc(x)}</q>`).join(' · ')}</div>` : ''}
     </div>
   </div>`;
 }
@@ -583,14 +584,19 @@ function kbTraceHTML(x) {
   const cost = t.cost && t.cost.usd > 0 ? ' · ' + kbCost(t.cost) : '';
   const line = `<div class="kb-tr-line" id="kb-tr-line">
     <span>кандидатов <b id="kb-k0-n">${esc(cands.length)}</b> → осталось <b id="kb-k1-n">${esc(kept)}</b></span>
-    ${c.filter ? `<span>порог <b>${esc(thr ? thr.toFixed(2) : '—')}</b> · Δ <b>${esc(delta.toFixed(2))}</b>${rel ? ` <span class="hint">(не хуже ${esc(rel.toFixed(3))})</span>` : ''}</span>` : '<span class="hint">фильтр выключен — отсечение только за пределами k</span>'}
+    ${c.filter ? `<span>порог <b>${esc(thr ? thr.toFixed(3) : '—')}</b>${t.min_score_from ? ` <span class="hint" id="kb-thr-from">(${esc(t.min_score_from)})</span>` : ''} · Δ <b>${esc(delta.toFixed(2))}</b>${rel ? ` <span class="hint">(не хуже ${esc(rel.toFixed(3))})</span>` : ''}</span>` : '<span class="hint">фильтр выключен — отсечение только за пределами k</span>'}
+    ${dense && t.top_dense > 0 ? `<span id="kb-top-gap" title="лучший косинус кандидатов и его отрыв от второго (top1 − top2)">лучший <b>${esc(kbNum3(t.top_dense))}</b> · отрыв <b>${esc(kbNum3(t.gap))}</b></span>` : ''}
     <span>${kbModeLine(t.info || info)}</span>
     <span>реранкинг <b>${esc(rerank ? kbRerankText[rerank] || rerank : 'нет')}</b></span>
     <span class="hint">индекс ${esc(info.index || c.Index || '')} · ${esc(kbMs(t.ms))}${esc(cost)}</span>
   </div>`;
-  const empty = t.empty ? `<div class="kb-empty" id="kb-empty"><b>Пусто после фильтра</b> — лучший косинус ${esc(kbNum3(t.top_dense))}${thr ? ' ниже порога ' + esc(thr.toFixed(2)) : ''}: в базе ответа, вероятно, нет. Модель получит «в базе знаний ничего не найдено».</div>` : '';
+  const anchored = kbList(t.anchored);
+  const empty = t.empty ? `<div class="kb-empty" id="kb-empty"><b>Пусто после фильтра</b> — лучший косинус ${esc(kbNum3(t.top_dense))}${thr && !anchored.length ? ' ниже порога ' + esc(thr.toFixed(3)) : ''}: в базе ответа, вероятно, нет. Модель получит «в базе знаний ничего не найдено».</div>` : '';
+  // Якорь: вид назван в самой реплике — абсолютный пол к запросу не
+  // применяется (статья о виде в базе есть; нужен ли аспект — дело ответа).
+  const anchor = anchored.length && c.filter && dense ? `<div class="kb-tr-note kb-anchor" id="kb-anchored" title="пол косинуса отделяет «в базе есть» от «в базе нет»; статья о названном виде в базе есть точно — относительный порог и отсев повторов действуют"><b>Вид назван в запросе</b> (${esc(anchored.join(', '))}) — абсолютный порог не применяется.</div>` : '';
   const head = `<tr><th class="kb-r" title="ранг после реранкинга">№</th>
-    <th class="kb-cand-cos">косинус dense${thr && dense ? ` <span class="kb-thr-key" title="черта — абсолютный порог; пунктир — «не хуже лучшего на Δ»">│ порог ${esc(thr.toFixed(2))}</span>` : ''}</th>
+    <th class="kb-cand-cos">косинус dense${thr && dense ? ` <span class="kb-thr-key" title="черта — абсолютный порог; пунктир — «не хуже лучшего на Δ»">│ порог ${esc(thr.toFixed(3))}</span>` : ''}</th>
     <th class="kb-r" title="ранг в выдаче dense">dense</th><th class="kb-r" title="ранг в выдаче BM25">BM25</th>
     <th class="kb-r" title="${rerank === 'llm' ? 'оценка модели 0–3' : 'RRF рангов dense и BM25, k = 60'}">${rerank === 'llm' ? 'модель' : 'RRF'}</th>
     <th>статья › раздел</th><th>судьба</th></tr>`;
@@ -611,6 +617,7 @@ function kbTraceHTML(x) {
     ${kbTraceQueryHTML(t)}
     ${line}
     ${t.note ? `<div class="kb-tr-note">${esc(t.note)}</div>` : ''}
+    ${anchor}
     ${x.error ? `<div class="facts-error">${esc(x.error)}</div>` : ''}
     ${empty}
     ${cands.length ? `<table class="grid kb-table kb-cands" id="kb-cands">${head}${rows}</table>` : '<p class="hint">Кандидатов нет — поиск ничего не нашёл.</p>'}
@@ -750,9 +757,9 @@ const kbModeTitle = {
 const kbModeHint = {
   norag: 'модель отвечает по памяти: системный промпт и вопрос',
   rag: 'тот же системный промпт и вопрос плюс найденные фрагменты базы',
-  'rag+filter': 'кандидаты K0 → фильтр релевантности и отсев повторов раздела → итог',
+  'rag+filter': 'кандидаты K0 → фильтр релевантности и отсев повторов текста → итог',
   'rag+rewrite': 'запрос переписан кодом (синонимы, контекст) — переписанный идёт только в поиск',
-  'rag+both': 'rewrite + гибридный реранкинг dense и BM25 + фильтр релевантности',
+  'rag+both': 'rewrite кодом + фильтр релевантности',
 };
 const kbMaxAskModes = 3;
 function kbPipedMode(m) { return m === 'rag+filter' || m === 'rag+rewrite' || m === 'rag+both'; }
@@ -982,7 +989,7 @@ function kbTraceBriefHTML(t) {
   const kept = cands.filter(c => c.kept).length || kbList(t.hits).length;
   return `<div class="kb-tb" data-empty="${t.empty ? 1 : 0}" data-changed="${rw !== orig ? 1 : 0}">
     ${rw !== orig ? `<div class="kb-tb-rw">в поиск: <q class="kb-tb-q">${kbRewrittenHTML(orig, rw)}</q>${kbList(t.expanded).map(e => ` <span class="chip kb-expanded">${esc(e)}</span>`).join('')}</div>` : '<div class="kb-tb-rw hint">запрос не переписан</div>'}
-    <div class="kb-tb-n">осталось <b>${esc(kept)}</b> из ${esc(cands.length)} кандидатов${typeof t.min_score === 'number' && t.min_score > 0 && (t.config || {}).filter ? ` · порог ${esc(t.min_score.toFixed(2))}` : ''}${typeof t.top_dense === 'number' && t.top_dense > 0 ? ` · лучший косинус ${esc(t.top_dense.toFixed(3))}` : ''}</div>
+    <div class="kb-tb-n">осталось <b>${esc(kept)}</b> из ${esc(cands.length)} кандидатов${typeof t.min_score === 'number' && t.min_score > 0 && (t.config || {}).filter ? ` · порог ${esc(t.min_score.toFixed(3))}${kbList(t.anchored).length ? ' (не применяется: вид назван в запросе)' : ''}` : ''}${typeof t.top_dense === 'number' && t.top_dense > 0 ? ` · лучший косинус ${esc(t.top_dense.toFixed(3))}${typeof t.gap === 'number' ? ', отрыв ' + esc(t.gap.toFixed(3)) : ''}` : ''}</div>
     ${t.empty ? '<div class="kb-tb-empty">пусто после фильтра — в базе ответа, вероятно, нет</div>' : ''}
   </div>`;
 }
@@ -1391,19 +1398,22 @@ const kbPresetText = {
   base: 'без фильтра и rewrite',
   filter: 'фильтр релевантности',
   rewrite: 'rewrite кодом',
-  both: 'rewrite + гибрид + фильтр',
-  hybrid: 'гибридный реранкинг',
+  both: 'rewrite + фильтр',
+  hybrid: 'rewrite + гибрид (RRF) + фильтр',
+  'rrf-only': 'только гибрид (RRF)',
   'llm-rewrite': 'rewrite моделью (платно)',
   'llm-rerank': 'реранкинг моделью (платно)',
 };
 // Колонки матрицы: ключ, заголовок, подсказка, формат, направление лучшего.
 const kbMxCols = [
-  ['recall_before', 'recall до', 'доказательство среди K0 кандидатов', kbNum2, 'max'],
+  ['recall_before', 'recall до', 'доказательство в dense-выдаче K0 (как у base)', kbNum2, 'max'],
+  ['recall_union', 'dense∪BM25', 'доказательство среди всех кандидатов: dense и BM25 всех запросов', kbNum2, 'max'],
   ['recall_after', 'recall после', 'доказательство в итоге — то, что увидит модель', kbNum2, 'max'],
   ['mrr', 'MRR', 'средний обратный ранг доказательства в итоге', kbNum2, 'max'],
-  ['precision', 'precision', 'доля итоговых фрагментов с доказательством', kbNum2, 'max'],
+  ['precision', 'precision', 'среднее по вопросам доли итоговых фрагментов с доказательством; пустой итог на отвечаемом вопросе — 0', kbNum2, 'max'],
   ['cut_share', 'отсечено', 'доля кандидатов K0, отсечённых фильтром', kbPct, ''],
-  ['wrong_cut', 'ошибочно отсечено', 'вопросы, у которых доказательство было среди кандидатов, но отсечено', kbPct, 'min'],
+  ['wrong_cut', 'ошибочно отсечено', 'доля релевантных (с доказательством) среди отсечённых фильтром кандидатов', kbPct, 'min'],
+  ['lost_q', 'доказательство снято', 'доля вопросов, где фильтр снял доказательство, которое было среди кандидатов', kbPct, 'min'],
   ['out_empty', 'out: пусто', 'неотвечаемые вопросы, где после фильтра не осталось ничего', null, 'max'],
   ['tokens', 'токенов', 'среднее токенов итоговых фрагментов', x => num(Math.round(x || 0)), 'min'],
   ['ms', 'мс', 'среднее время поиска', x => (typeof x === 'number' ? x.toFixed(1) : '—'), 'min'],
@@ -1444,7 +1454,7 @@ function kbMatrixHTML() {
   const r = kb.matrix;
   if (!r) return '';
   if (!r.ok) {
-    if (r.code === 404) return `<section class="kb-mx">${kbNoneHTML('kb-matrix-none', 'Матрицы режимов', r, kbMatrixCmd, 'прогонит конфигурации поиска (без фильтра, фильтр, rewrite, оба) × K1 на наборах test, dev и out и сохранит examples/rag/filter.json.')}</section>`;
+    if (r.code === 404) return `<section class="kb-mx">${kbNoneHTML('kb-matrix-none', 'Матрицы режимов', r, kbMatrixCmd, 'прогонит конфигурации поиска (без фильтра, фильтр, rewrite, оба, гибрид) × K1 на наборах test, dev и out и сохранит examples/rag/filter.json.')}</section>`;
     return `<section class="kb-mx"><div class="facts-error" id="kb-matrix-error">${esc(r.error)}</div></section>`;
   }
   const d = r.data || {};
@@ -1455,9 +1465,13 @@ function kbMatrixHTML() {
   // Только неотвечаемые (out) — recall и precision не определены; колонка
   // «out: пусто» — только если на экране есть такие вопросы.
   const outOnly = x => x.out_n > 0 && x.out_n >= x.n;
-  const noRecall = ['recall_before', 'recall_after', 'mrr', 'precision', 'wrong_cut'];
+  const noRecall = ['recall_before', 'recall_union', 'recall_after', 'mrr', 'precision', 'wrong_cut', 'lost_q'];
+  // Старые отчёты (до lost_q): wrong_cut там — доля вопросов, где фильтр
+  // снял доказательство, то есть нынешний lost_q.
+  const legacy = rows.length > 0 && rows.every(x => !('lost_q' in x));
+  const field = (x, k) => (legacy && k === 'lost_q' ? x.wrong_cut : legacy && k === 'wrong_cut' ? undefined : x[k]);
   const cols = kbMxCols.filter(c => c[0] !== 'out_empty' || shown.some(x => x.out_n));
-  const val = (x, k) => (typeof x[k] === 'number' && !(outOnly(x) && noRecall.includes(k)) ? x[k] : null);
+  const val = (x, k) => (typeof field(x, k) === 'number' && !(outOnly(x) && noRecall.includes(k)) ? field(x, k) : null);
   // Лучшее — среди строк того же набора и K1.
   const best = (x, k, dir) => {
     if (!dir) return '';
@@ -1470,7 +1484,7 @@ function kbMatrixHTML() {
   const fmt = (x, c) => {
     if (outOnly(x) && noRecall.includes(c[0])) return '<span class="hint">—</span>';
     if (c[0] === 'out_empty') return x.out_n ? `${esc(kbNum2(x.out_empty))} <span class="hint">(${esc(Math.round(x.out_empty * x.out_n))} из ${esc(x.out_n)})</span>` : '<span class="hint">—</span>';
-    return esc(c[3](x[c[0]]));
+    return esc(c[3](field(x, c[0])));
   };
   let prev = '';
   const body = shown.map(x => {
@@ -1500,12 +1514,16 @@ function kbCalibHTML() {
   const r = kb.calib;
   if (!r) return '';
   if (!r.ok) {
-    if (r.code === 404) return `<section class="kb-cal">${kbNoneHTML('kb-calib-none', 'Калибровки порога', r, kbCalibCmd, 'переберёт порог косинуса на dev и out, выберет наибольший без заметной потери recall и запишет его в индекс (и в examples/rag/calibrate.json).')}</section>`;
+    if (r.code === 404) return `<section class="kb-cal">${kbNoneHTML('kb-calib-none', 'Калибровки порога', r, kbCalibCmd, 'подберёт порог косинуса на dev и out — середину зазора между вопросами вне базы и доказательствами dev (без зазора — наибольший без заметной потери recall); с -write запишет его в индекс (отчёт — examples/rag/calibrate.json).')}</section>`;
     return `<section class="kb-cal"><div class="facts-error" id="kb-calib-error">${esc(r.error)}</div></section>`;
   }
   const d = r.data || {};
-  const table = kbList(d.table).slice().sort((a, b) => a.min_score - b.min_score);
   const near = (a, b) => typeof a === 'number' && typeof b === 'number' && Math.abs(a - b) < 1e-9;
+  // Середина зазора может не попасть на шаг перебора — её строка (at)
+  // встаёт в таблицу отдельно.
+  const grid = kbList(d.table);
+  const at = d.at && d.at.min_score > 0 && !grid.some(x => near(x.min_score, d.chosen)) ? [d.at] : [];
+  const table = grid.concat(at).sort((a, b) => a.min_score - b.min_score);
   const rows = table.map(x => {
     const on = near(x.min_score, d.chosen);
     const lost = kbList(x.lost_dev);
@@ -1519,6 +1537,7 @@ function kbCalibHTML() {
     <div class="kb-report-meta" id="kb-calib-meta"><span>индекс <b>${esc(d.index || '—')}</b></span><span>эмбеддер <b>${esc(d.embedder || '—')}</b></span>
       <span>выбран порог <b id="kb-calib-chosen">${esc(kbNum3(d.chosen))}</b></span><span>Δ <b>${esc(kbNum2(d.delta))}</b></span>
       <span>recall dev без фильтра <b>${esc(kbNum2(d.base_recall))}</b>, допустимое падение <b>${esc(kbNum2(d.max_drop))}</b></span></div>
+    ${kbCalibGapHTML(d)}
     <div class="kb-cal-grid">
       <div class="kb-cal-tbl"><table class="grid kb-table" id="kb-calib-table"><tr><th class="kb-r">порог</th><th class="kb-r" title="доказательство в итоге на отвечаемых вопросах dev">recall dev</th>
         <th class="kb-r" title="доля вопросов out, где после фильтра пусто">out пусто</th><th title="dev-вопросы, у которых фильтр отсёк доказательство">потеряно dev</th></tr>${rows}</table></div>
@@ -1526,6 +1545,24 @@ function kbCalibHTML() {
         <figcaption class="hint">Лучший косинус кандидатов: <span class="kb-hist-key dev"></span> отвечаемые dev, <span class="kb-hist-key out"></span> вне базы (out); черта — выбранный порог.</figcaption></figure>
     </div>
   </section>`;
+}
+
+// kbCalibGapHTML — правило выбора порога: зазор между лучшим косинусом
+// вопросов вне базы и доказательством неякорных dev, запасы и вопросы,
+// чувствительные к полу. У старых отчётов (без rule) — ничего.
+function kbCalibGapHTML(d) {
+  if (!d.rule) return '';
+  const ids = xs => (kbList(xs).length ? kbList(xs).map(id => `<code>${esc(id)}</code>`).join(' ') : '<span class="hint">—</span>');
+  const has = v => typeof v === 'number' && v >= 0;
+  const rule = d.rule === 'gap' ? 'середина зазора' : `max-drop ${kbNum2(d.max_drop)}`;
+  return `<div class="kb-cal-gap" id="kb-calib-gap">
+    <div><span class="chip${d.rule === 'gap' ? ' ok' : ''}" id="kb-calib-rule">${esc(rule)}</span>
+      вне базы (без якоря) до <b>${esc(has(d.out_max) ? kbNum3(d.out_max) : '—')}</b>${d.out_max_id ? ` <span class="hint">${esc(d.out_max_id)}</span>` : ''}
+      · доказательство неякорных dev от <b>${esc(has(d.evidence_min) ? kbNum3(d.evidence_min) : '—')}</b>${d.evidence_min_id ? ` <span class="hint">${esc(d.evidence_min_id)}</span>` : ''}
+      ${has(d.out_max) && has(d.evidence_min) ? ` · зазор <b>${esc((d.gap >= 0 ? '+' : '') + kbNum3(d.gap))}</b> · запас <b>${esc(kbNum3(d.margin_out))}</b> / <b>${esc(kbNum3(d.margin_dev))}</b>` : ''}</div>
+    <div class="hint">к полу чувствительны (вид в реплике не назван): dev ${ids(d.floor_dev)} · out ${ids(d.floor_out)} · test ${ids(d.floor_test)}${kbList(d.floor_missed).length ? ` · не дошли и без пола (в зазор не входят): ${ids(d.floor_missed)}` : ''}</div>
+    ${d.note ? `<div class="kb-tr-note">${esc(d.note)}</div>` : ''}
+  </div>`;
 }
 
 // kbHistSVG — гистограмма косинусов лучшего кандидата dev и out по
