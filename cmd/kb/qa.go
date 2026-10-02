@@ -24,7 +24,7 @@ func runQA(ctx context.Context, args []string, out, errOut io.Writer) int {
 	fs := newFlagSet("qa", "[флаги]", errOut)
 	questions := fs.String("questions", "eval/questions.json", "контрольные вопросы")
 	splits := fs.String("splits", kb.SplitTest, "наборы через запятую: test, dev, out")
-	modes := fs.String("modes", "norag,rag", "режимы через запятую: norag, rag")
+	modes := fs.String("modes", "norag,rag", "режимы через запятую: norag, rag, rag+filter, rag+rewrite, rag+both")
 	repeat := fs.Int("repeat", 1, "повторов каждого режима (≥ 2 — замер шума модели)")
 	judge := fs.Bool("judge", true, "оценка судьёй-моделью (без судьи — только правило)")
 	seed := fs.Int64("seed", 22, "порядок, в котором судья видит ответы")
@@ -54,7 +54,7 @@ func runQA(ctx context.Context, args []string, out, errOut io.Writer) int {
 			sp = append(sp, s)
 		}
 	}
-	a, closeKB, code := af.answerer(ctx, hasMode(ms, rag.RAG), errOut)
+	a, closeKB, code := af.answerer(ctx, needsKB(ms), errOut)
 	if code >= 0 {
 		return code
 	}
@@ -116,9 +116,14 @@ func runQA(ctx context.Context, args []string, out, errOut io.Writer) int {
 // или rag не было.
 func ragFallback(r rag.Report) string {
 	for _, row := range r.Rows {
-		for _, run := range row.Runs[rag.RAG] {
-			if run.Answer.Search.Fallback != "" {
-				return run.Answer.Search.Fallback
+		for m, runs := range row.Runs {
+			if !m.UsesBase() {
+				continue
+			}
+			for _, run := range runs {
+				if run.Answer.Search.Fallback != "" {
+					return run.Answer.Search.Fallback
+				}
 			}
 		}
 	}

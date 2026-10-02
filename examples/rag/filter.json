@@ -1,0 +1,6231 @@
+{
+  "created": "2026-10-02T17:17:04.7888335Z",
+  "corpus_sha": "7b926f7a18d0bff5fcd783e558234cb92c4530846be1bac338e99bc07491dcea",
+  "embedder": "intfloat/multilingual-e5-base",
+  "index": "structure",
+  "min_score": 0.825,
+  "delta": 0.05,
+  "rows": [
+    {
+      "name": "base",
+      "split": "dev",
+      "k1": 3,
+      "n": 19,
+      "recall_before": 0.9473684210526315,
+      "recall_after": 0.7894736842105263,
+      "mrr": 0.6491228070175438,
+      "precision": 0.2631578947368421,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 804.6315789473684,
+      "ms": 7.9855789473684196,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rank_before": 23,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "base",
+      "split": "dev",
+      "k1": 5,
+      "n": 19,
+      "recall_before": 0.9473684210526315,
+      "recall_after": 0.8421052631578947,
+      "mrr": 0.6622807017543859,
+      "precision": 0.18947368421052632,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 1370.1052631578948,
+      "ms": 7.9855789473684196,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rank_before": 23,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "base",
+      "split": "dev",
+      "k1": 8,
+      "n": 19,
+      "recall_before": 0.9473684210526315,
+      "recall_after": 0.8421052631578947,
+      "mrr": 0.6622807017543859,
+      "precision": 0.11842105263157894,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 2167.5263157894738,
+      "ms": 7.9855789473684196,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rank_before": 23,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "base",
+      "split": "test",
+      "k1": 3,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.625,
+      "mrr": 0.5625,
+      "precision": 0.25,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 2,
+      "tokens": 817.6,
+      "ms": 6.6068,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rank_before": 8,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rank_before": 22,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rank_before": 5,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "base",
+      "split": "test",
+      "k1": 5,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.75,
+      "mrr": 0.5875,
+      "precision": 0.175,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 2,
+      "tokens": 1367.8,
+      "ms": 6.6068,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rank_before": 8,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rank_before": 22,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "base",
+      "split": "test",
+      "k1": 8,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.875,
+      "mrr": 0.603125,
+      "precision": 0.125,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 2,
+      "tokens": 2115.6,
+      "ms": 6.6068,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rank_before": 8,
+          "rank_after": 8,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rank_before": 22,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "base",
+      "split": "out",
+      "k1": 3,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 8,
+      "tokens": 915.25,
+      "ms": 5.30075,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "base",
+      "split": "out",
+      "k1": 5,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 8,
+      "tokens": 1580.125,
+      "ms": 5.30075,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "base",
+      "split": "out",
+      "k1": 8,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 8,
+      "tokens": 2396.625,
+      "ms": 5.30075,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "filter",
+      "split": "dev",
+      "k1": 3,
+      "n": 19,
+      "recall_before": 0.9473684210526315,
+      "recall_after": 0.7894736842105263,
+      "mrr": 0.6491228070175438,
+      "precision": 0.2777777777777778,
+      "cut_share": 0.5741056218057922,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 748.5263157894736,
+      "ms": 5.382,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 1,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 2,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rank_before": 23,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "filter",
+      "split": "dev",
+      "k1": 5,
+      "n": 19,
+      "recall_before": 0.9473684210526315,
+      "recall_after": 0.8421052631578947,
+      "mrr": 0.6622807017543859,
+      "precision": 0.21428571428571427,
+      "cut_share": 0.5741056218057922,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 1197.5263157894738,
+      "ms": 5.382,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 4,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 1,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 2,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 4,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rank_before": 23,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "filter",
+      "split": "dev",
+      "k1": 8,
+      "n": 19,
+      "recall_before": 0.9473684210526315,
+      "recall_after": 0.8421052631578947,
+      "mrr": 0.6622807017543859,
+      "precision": 0.15,
+      "cut_share": 0.5741056218057922,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 1712.3684210526317,
+      "ms": 5.382,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 4,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 1,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 2,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 7,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 4,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 6,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rank_before": 23,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "filter",
+      "split": "test",
+      "k1": 3,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.5,
+      "mrr": 0.5,
+      "precision": 0.2631578947368421,
+      "cut_share": 0.6830065359477124,
+      "wrong_cut": 0.125,
+      "out_empty": 0.5,
+      "out_n": 2,
+      "tokens": 588.5,
+      "ms": 5.914000000000001,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 1,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rank_before": 8,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": true,
+          "cut": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rank_before": 22,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rank_before": 5,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "filter",
+      "split": "test",
+      "k1": 5,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.625,
+      "mrr": 0.525,
+      "precision": 0.20689655172413793,
+      "cut_share": 0.6830065359477124,
+      "wrong_cut": 0.125,
+      "out_empty": 0.5,
+      "out_n": 2,
+      "tokens": 936,
+      "ms": 5.914000000000001,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 1,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rank_before": 8,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": true,
+          "cut": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rank_before": 22,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "filter",
+      "split": "test",
+      "k1": 8,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.75,
+      "mrr": 0.540625,
+      "precision": 0.17073170731707318,
+      "cut_share": 0.6830065359477124,
+      "wrong_cut": 0.125,
+      "out_empty": 0.5,
+      "out_n": 2,
+      "tokens": 1345.9,
+      "ms": 5.914000000000001,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 1,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rank_before": 8,
+          "rank_after": 8,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": true,
+          "cut": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rank_before": 22,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "filter",
+      "split": "out",
+      "k1": 3,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0.8974358974358975,
+      "wrong_cut": 0,
+      "out_empty": 0.75,
+      "out_n": 8,
+      "tokens": 196.375,
+      "ms": 5.583000000000001,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "filter",
+      "split": "out",
+      "k1": 5,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0.8974358974358975,
+      "wrong_cut": 0,
+      "out_empty": 0.75,
+      "out_n": 8,
+      "tokens": 367,
+      "ms": 5.583000000000001,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "filter",
+      "split": "out",
+      "k1": 8,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0.8974358974358975,
+      "wrong_cut": 0,
+      "out_empty": 0.75,
+      "out_n": 8,
+      "tokens": 527,
+      "ms": 5.583000000000001,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 6,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "split": "dev",
+      "k1": 3,
+      "n": 19,
+      "recall_before": 1,
+      "recall_after": 0.7894736842105263,
+      "mrr": 0.5789473684210527,
+      "precision": 0.2631578947368421,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 764.5263157894736,
+      "ms": 6.01742105263158,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rewritten": "Какой длины нора у корсака? Vulpes corsac",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rewritten": "С какой скоростью может бежать степная лисица? корсак Vulpes corsac",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rewritten": "Какую площадь занимает домашний участок барханного кота? Felis margarita",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rewritten": "Почему беременность у перевязки длится так долго и сколько именно? Vormela peregusna",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rewritten": "Какой охранный статус МСОП у американского красного волка Canis rufus по MDD v2.5? Cuon alpinus",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rewritten": "Сколько зубов у красного волка и чем его зубная система отличается от других псовых? Cuon alpinus",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rewritten": "На какое расстояние прыгает харза, перескакивая с дерева на дерево? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rewritten": "Какую долю рациона харзы в Сихотэ-Алинском заповеднике составляют копытные? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rewritten": "Сколько хромосом у палласова кота? манул Otocolobus manul",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rewritten": "На какой максимальной высоте зарегистрирован манул? Otocolobus manul",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rewritten": "Во сколько раз может меняться численность солонгоя в Забайкалье? Mustela altaica",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rewritten": "А на какое расстояние он прыгает, когда охотится? каракал Caracal caracal",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rewritten": "А сколько их всего осталось? манул Otocolobus manul",
+          "rank_before": 5,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rewritten": "Сколько хаусов обитает на территории России? камышовый кот Felis chaus",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rewritten": "Сколько снежных леопардов оставалось в дикой природе в 2020 году по оценке WWF? ирбис Panthera uncia",
+          "rank_before": 5,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rewritten": "У кого беременность длится дольше — у каракала или у камышового кота, и насколько? Caracal caracal Felis chaus",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "split": "dev",
+      "k1": 5,
+      "n": 19,
+      "recall_before": 1,
+      "recall_after": 1,
+      "mrr": 0.6263157894736842,
+      "precision": 0.21052631578947367,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 1317.9473684210527,
+      "ms": 6.01742105263158,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rewritten": "Какой длины нора у корсака? Vulpes corsac",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rewritten": "С какой скоростью может бежать степная лисица? корсак Vulpes corsac",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rewritten": "Какую площадь занимает домашний участок барханного кота? Felis margarita",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rewritten": "Почему беременность у перевязки длится так долго и сколько именно? Vormela peregusna",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rewritten": "Какой охранный статус МСОП у американского красного волка Canis rufus по MDD v2.5? Cuon alpinus",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rewritten": "Сколько зубов у красного волка и чем его зубная система отличается от других псовых? Cuon alpinus",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rewritten": "На какое расстояние прыгает харза, перескакивая с дерева на дерево? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rewritten": "Какую долю рациона харзы в Сихотэ-Алинском заповеднике составляют копытные? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rewritten": "Сколько хромосом у палласова кота? манул Otocolobus manul",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rewritten": "На какой максимальной высоте зарегистрирован манул? Otocolobus manul",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rewritten": "Во сколько раз может меняться численность солонгоя в Забайкалье? Mustela altaica",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rewritten": "А на какое расстояние он прыгает, когда охотится? каракал Caracal caracal",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rewritten": "А сколько их всего осталось? манул Otocolobus manul",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rewritten": "Сколько хаусов обитает на территории России? камышовый кот Felis chaus",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rewritten": "Сколько снежных леопардов оставалось в дикой природе в 2020 году по оценке WWF? ирбис Panthera uncia",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rewritten": "У кого беременность длится дольше — у каракала или у камышового кота, и насколько? Caracal caracal Felis chaus",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "split": "dev",
+      "k1": 8,
+      "n": 19,
+      "recall_before": 1,
+      "recall_after": 1,
+      "mrr": 0.6263157894736842,
+      "precision": 0.13157894736842105,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 2111.7368421052633,
+      "ms": 6.01742105263158,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rewritten": "Какой длины нора у корсака? Vulpes corsac",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rewritten": "С какой скоростью может бежать степная лисица? корсак Vulpes corsac",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rewritten": "Какую площадь занимает домашний участок барханного кота? Felis margarita",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rewritten": "Почему беременность у перевязки длится так долго и сколько именно? Vormela peregusna",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rewritten": "Какой охранный статус МСОП у американского красного волка Canis rufus по MDD v2.5? Cuon alpinus",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rewritten": "Сколько зубов у красного волка и чем его зубная система отличается от других псовых? Cuon alpinus",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rewritten": "На какое расстояние прыгает харза, перескакивая с дерева на дерево? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rewritten": "Какую долю рациона харзы в Сихотэ-Алинском заповеднике составляют копытные? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rewritten": "Сколько хромосом у палласова кота? манул Otocolobus manul",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rewritten": "На какой максимальной высоте зарегистрирован манул? Otocolobus manul",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rewritten": "Во сколько раз может меняться численность солонгоя в Забайкалье? Mustela altaica",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rewritten": "А на какое расстояние он прыгает, когда охотится? каракал Caracal caracal",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rewritten": "А сколько их всего осталось? манул Otocolobus manul",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rewritten": "Сколько хаусов обитает на территории России? камышовый кот Felis chaus",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rewritten": "Сколько снежных леопардов оставалось в дикой природе в 2020 году по оценке WWF? ирбис Panthera uncia",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rewritten": "У кого беременность длится дольше — у каракала или у камышового кота, и насколько? Caracal caracal Felis chaus",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "split": "test",
+      "k1": 3,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.875,
+      "mrr": 0.625,
+      "precision": 0.3333333333333333,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 2,
+      "tokens": 767.9,
+      "ms": 6.3201,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rewritten": "Какую памятную монету Банк России выпустил в честь перевязки, когда и каким тиражом? Vormela peregusna",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rewritten": "Какова суточная норма пищи взрослого самца солонгоя? Mustela altaica",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rewritten": "Сколько видов малых (красных) панд признаёт MDD v2.5? малая панда Ailurus fulgens",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rewritten": "Какое расстояние обычно длится погоня красного волка за добычей и с какой скоростью он бежит? Cuon alpinus",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rewritten": "Кто тяжелее — взрослый самец харзы или самец барханного кота — и какова масса каждого? Martes flavigula Felis margarita",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rewritten": "Сколько часов в день кошачий медведь тратит на еду? малая панда Ailurus fulgens",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rewritten": "А сколько она весит? харза Martes flavigula",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт камышовый кот в природе и в неволе? Felis chaus",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "split": "test",
+      "k1": 5,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 1,
+      "mrr": 0.65625,
+      "precision": 0.225,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 2,
+      "tokens": 1292.1,
+      "ms": 6.3201,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rewritten": "Какую памятную монету Банк России выпустил в честь перевязки, когда и каким тиражом? Vormela peregusna",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rewritten": "Какова суточная норма пищи взрослого самца солонгоя? Mustela altaica",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rewritten": "Сколько видов малых (красных) панд признаёт MDD v2.5? малая панда Ailurus fulgens",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rewritten": "Какое расстояние обычно длится погоня красного волка за добычей и с какой скоростью он бежит? Cuon alpinus",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rewritten": "Кто тяжелее — взрослый самец харзы или самец барханного кота — и какова масса каждого? Martes flavigula Felis margarita",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rewritten": "Сколько часов в день кошачий медведь тратит на еду? малая панда Ailurus fulgens",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rewritten": "А сколько она весит? харза Martes flavigula",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт камышовый кот в природе и в неволе? Felis chaus",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "split": "test",
+      "k1": 8,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 1,
+      "mrr": 0.65625,
+      "precision": 0.140625,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 2,
+      "tokens": 2069.4,
+      "ms": 6.3201,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rewritten": "Какую памятную монету Банк России выпустил в честь перевязки, когда и каким тиражом? Vormela peregusna",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rewritten": "Какова суточная норма пищи взрослого самца солонгоя? Mustela altaica",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rewritten": "Сколько видов малых (красных) панд признаёт MDD v2.5? малая панда Ailurus fulgens",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rewritten": "Какое расстояние обычно длится погоня красного волка за добычей и с какой скоростью он бежит? Cuon alpinus",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rewritten": "Кто тяжелее — взрослый самец харзы или самец барханного кота — и какова масса каждого? Martes flavigula Felis margarita",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rewritten": "Сколько часов в день кошачий медведь тратит на еду? малая панда Ailurus fulgens",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rewritten": "А сколько она весит? харза Martes flavigula",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт камышовый кот в природе и в неволе? Felis chaus",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "split": "out",
+      "k1": 3,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 8,
+      "tokens": 907.125,
+      "ms": 5.085625,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт харза в дикой природе? Martes flavigula",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rewritten": "С какой максимальной скоростью бегает манул, в км/ч? Otocolobus manul",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "split": "out",
+      "k1": 5,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 8,
+      "tokens": 1538.875,
+      "ms": 5.085625,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт харза в дикой природе? Martes flavigula",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rewritten": "С какой максимальной скоростью бегает манул, в км/ч? Otocolobus manul",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "rewrite",
+      "split": "out",
+      "k1": 8,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 8,
+      "tokens": 2409,
+      "ms": 5.085625,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт харза в дикой природе? Martes flavigula",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rewritten": "С какой максимальной скоростью бегает манул, в км/ч? Otocolobus manul",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "both",
+      "split": "dev",
+      "k1": 3,
+      "n": 19,
+      "recall_before": 1,
+      "recall_after": 0.6842105263157895,
+      "mrr": 0.46491228070175433,
+      "precision": 0.2545454545454545,
+      "cut_share": 0.5640138408304498,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 639.0526315789474,
+      "ms": 6.281631578947367,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rewritten": "Какой длины нора у корсака? Vulpes corsac",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rewritten": "С какой скоростью может бежать степная лисица? корсак Vulpes corsac",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 2,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rewritten": "Какую площадь занимает домашний участок барханного кота? Felis margarita",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rewritten": "Почему беременность у перевязки длится так долго и сколько именно? Vormela peregusna",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 2,
+          "kept": 2,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rewritten": "Какой охранный статус МСОП у американского красного волка Canis rufus по MDD v2.5? Cuon alpinus",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rewritten": "Сколько зубов у красного волка и чем его зубная система отличается от других псовых? Cuon alpinus",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rewritten": "На какое расстояние прыгает харза, перескакивая с дерева на дерево? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rewritten": "Какую долю рациона харзы в Сихотэ-Алинском заповеднике составляют копытные? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rewritten": "Сколько хромосом у палласова кота? манул Otocolobus manul",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rewritten": "На какой максимальной высоте зарегистрирован манул? Otocolobus manul",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rewritten": "Во сколько раз может меняться численность солонгоя в Забайкалье? Mustela altaica",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rewritten": "А на какое расстояние он прыгает, когда охотится? каракал Caracal caracal",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rewritten": "А сколько их всего осталось? манул Otocolobus manul",
+          "rank_before": 12,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rewritten": "Сколько хаусов обитает на территории России? камышовый кот Felis chaus",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rewritten": "Сколько снежных леопардов оставалось в дикой природе в 2020 году по оценке WWF? ирбис Panthera uncia",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rewritten": "У кого беременность длится дольше — у каракала или у камышового кота, и насколько? Caracal caracal Felis chaus",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "both",
+      "split": "dev",
+      "k1": 5,
+      "n": 19,
+      "recall_before": 1,
+      "recall_after": 0.9473684210526315,
+      "mrr": 0.5307017543859649,
+      "precision": 0.2261904761904762,
+      "cut_share": 0.5640138408304498,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 1101.2631578947369,
+      "ms": 6.281631578947367,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rewritten": "Какой длины нора у корсака? Vulpes corsac",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rewritten": "С какой скоростью может бежать степная лисица? корсак Vulpes corsac",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 2,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rewritten": "Какую площадь занимает домашний участок барханного кота? Felis margarita",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rewritten": "Почему беременность у перевязки длится так долго и сколько именно? Vormela peregusna",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 2,
+          "kept": 2,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rewritten": "Какой охранный статус МСОП у американского красного волка Canis rufus по MDD v2.5? Cuon alpinus",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rewritten": "Сколько зубов у красного волка и чем его зубная система отличается от других псовых? Cuon alpinus",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rewritten": "На какое расстояние прыгает харза, перескакивая с дерева на дерево? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rewritten": "Какую долю рациона харзы в Сихотэ-Алинском заповеднике составляют копытные? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rewritten": "Сколько хромосом у палласова кота? манул Otocolobus manul",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rewritten": "На какой максимальной высоте зарегистрирован манул? Otocolobus manul",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rewritten": "Во сколько раз может меняться численность солонгоя в Забайкалье? Mustela altaica",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rewritten": "А на какое расстояние он прыгает, когда охотится? каракал Caracal caracal",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rewritten": "А сколько их всего осталось? манул Otocolobus manul",
+          "rank_before": 12,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rewritten": "Сколько хаусов обитает на территории России? камышовый кот Felis chaus",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 4,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rewritten": "Сколько снежных леопардов оставалось в дикой природе в 2020 году по оценке WWF? ирбис Panthera uncia",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rewritten": "У кого беременность длится дольше — у каракала или у камышового кота, и насколько? Caracal caracal Felis chaus",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "both",
+      "split": "dev",
+      "k1": 8,
+      "n": 19,
+      "recall_before": 1,
+      "recall_after": 0.9473684210526315,
+      "mrr": 0.5307017543859649,
+      "precision": 0.15833333333333333,
+      "cut_share": 0.5640138408304498,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 1659.6315789473683,
+      "ms": 6.281631578947367,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rewritten": "Какой длины нора у корсака? Vulpes corsac",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 7,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rewritten": "С какой скоростью может бежать степная лисица? корсак Vulpes corsac",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 2,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rewritten": "Какую площадь занимает домашний участок барханного кота? Felis margarita",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 6,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rewritten": "Почему беременность у перевязки длится так долго и сколько именно? Vormela peregusna",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 2,
+          "kept": 2,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 7,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rewritten": "Какой охранный статус МСОП у американского красного волка Canis rufus по MDD v2.5? Cuon alpinus",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rewritten": "Сколько зубов у красного волка и чем его зубная система отличается от других псовых? Cuon alpinus",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rewritten": "На какое расстояние прыгает харза, перескакивая с дерева на дерево? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rewritten": "Какую долю рациона харзы в Сихотэ-Алинском заповеднике составляют копытные? Martes flavigula",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rewritten": "Сколько хромосом у палласова кота? манул Otocolobus manul",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 6,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rewritten": "На какой максимальной высоте зарегистрирован манул? Otocolobus manul",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rewritten": "Во сколько раз может меняться численность солонгоя в Забайкалье? Mustela altaica",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rewritten": "А на какое расстояние он прыгает, когда охотится? каракал Caracal caracal",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rewritten": "А сколько их всего осталось? манул Otocolobus manul",
+          "rank_before": 12,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rewritten": "Сколько хаусов обитает на территории России? камышовый кот Felis chaus",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 4,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rewritten": "Сколько снежных леопардов оставалось в дикой природе в 2020 году по оценке WWF? ирбис Panthera uncia",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rewritten": "У кого беременность длится дольше — у каракала или у камышового кота, и насколько? Caracal caracal Felis chaus",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "both",
+      "split": "test",
+      "k1": 3,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.625,
+      "mrr": 0.4166666666666667,
+      "precision": 0.23809523809523808,
+      "cut_share": 0.5941558441558441,
+      "wrong_cut": 0.125,
+      "out_empty": 0.5,
+      "out_n": 2,
+      "tokens": 518.3,
+      "ms": 6.535700000000001,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rewritten": "Какую памятную монету Банк России выпустил в честь перевязки, когда и каким тиражом? Vormela peregusna",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rewritten": "Какова суточная норма пищи взрослого самца солонгоя? Mustela altaica",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rewritten": "Сколько видов малых (красных) панд признаёт MDD v2.5? малая панда Ailurus fulgens",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rewritten": "Какое расстояние обычно длится погоня красного волка за добычей и с какой скоростью он бежит? Cuon alpinus",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rewritten": "Кто тяжелее — взрослый самец харзы или самец барханного кота — и какова масса каждого? Martes flavigula Felis margarita",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": true,
+          "cut": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rewritten": "Сколько часов в день кошачий медведь тратит на еду? малая панда Ailurus fulgens",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rewritten": "А сколько она весит? харза Martes flavigula",
+          "rank_before": 5,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт камышовый кот в природе и в неволе? Felis chaus",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "both",
+      "split": "test",
+      "k1": 5,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.875,
+      "mrr": 0.4729166666666667,
+      "precision": 0.24242424242424243,
+      "cut_share": 0.5941558441558441,
+      "wrong_cut": 0.125,
+      "out_empty": 0.5,
+      "out_n": 2,
+      "tokens": 901.6,
+      "ms": 6.535700000000001,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rewritten": "Какую памятную монету Банк России выпустил в честь перевязки, когда и каким тиражом? Vormela peregusna",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rewritten": "Какова суточная норма пищи взрослого самца солонгоя? Mustela altaica",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rewritten": "Сколько видов малых (красных) панд признаёт MDD v2.5? малая панда Ailurus fulgens",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rewritten": "Какое расстояние обычно длится погоня красного волка за добычей и с какой скоростью он бежит? Cuon alpinus",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rewritten": "Кто тяжелее — взрослый самец харзы или самец барханного кота — и какова масса каждого? Martes flavigula Felis margarita",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": true,
+          "cut": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rewritten": "Сколько часов в день кошачий медведь тратит на еду? малая панда Ailurus fulgens",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rewritten": "А сколько она весит? харза Martes flavigula",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт камышовый кот в природе и в неволе? Felis chaus",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "both",
+      "split": "test",
+      "k1": 8,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.875,
+      "mrr": 0.4729166666666667,
+      "precision": 0.1568627450980392,
+      "cut_share": 0.5909090909090909,
+      "wrong_cut": 0.125,
+      "out_empty": 0.5,
+      "out_n": 2,
+      "tokens": 1413.5,
+      "ms": 6.535700000000001,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rewritten": "Какую памятную монету Банк России выпустил в честь перевязки, когда и каким тиражом? Vormela peregusna",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rewritten": "Какова суточная норма пищи взрослого самца солонгоя? Mustela altaica",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rewritten": "Сколько видов малых (красных) панд признаёт MDD v2.5? малая панда Ailurus fulgens",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rewritten": "Какое расстояние обычно длится погоня красного волка за добычей и с какой скоростью он бежит? Cuon alpinus",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rewritten": "Кто тяжелее — взрослый самец харзы или самец барханного кота — и какова масса каждого? Martes flavigula Felis margarita",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": true,
+          "cut": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rewritten": "Сколько часов в день кошачий медведь тратит на еду? малая панда Ailurus fulgens",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rewritten": "А сколько она весит? харза Martes flavigula",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт камышовый кот в природе и в неволе? Felis chaus",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "both",
+      "split": "out",
+      "k1": 3,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0.8561151079136691,
+      "wrong_cut": 0,
+      "out_empty": 0.75,
+      "out_n": 8,
+      "tokens": 204.875,
+      "ms": 5.692375,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт харза в дикой природе? Martes flavigula",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rewritten": "С какой максимальной скоростью бегает манул, в км/ч? Otocolobus manul",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "both",
+      "split": "out",
+      "k1": 5,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0.8561151079136691,
+      "wrong_cut": 0,
+      "out_empty": 0.75,
+      "out_n": 8,
+      "tokens": 358.5,
+      "ms": 5.692375,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт харза в дикой природе? Martes flavigula",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rewritten": "С какой максимальной скоростью бегает манул, в км/ч? Otocolobus manul",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "both",
+      "split": "out",
+      "k1": 8,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0.8561151079136691,
+      "wrong_cut": 0,
+      "out_empty": 0.75,
+      "out_n": 8,
+      "tokens": 583.25,
+      "ms": 5.692375,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 0,
+          "empty": true,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rewritten": "Сколько лет живёт харза в дикой природе? Martes flavigula",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rewritten": "С какой максимальной скоростью бегает манул, в км/ч? Otocolobus manul",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "hybrid",
+      "split": "dev",
+      "k1": 3,
+      "n": 19,
+      "recall_before": 0.9473684210526315,
+      "recall_after": 0.7894736842105263,
+      "mrr": 0.7280701754385965,
+      "precision": 0.2807017543859649,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 789.578947368421,
+      "ms": 5.587368421052631,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rank_before": 4,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rank_before": 11,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "hybrid",
+      "split": "dev",
+      "k1": 5,
+      "n": 19,
+      "recall_before": 0.9473684210526315,
+      "recall_after": 0.8421052631578947,
+      "mrr": 0.7412280701754387,
+      "precision": 0.17894736842105263,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 1293.2105263157894,
+      "ms": 5.587368421052631,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rank_before": 11,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "hybrid",
+      "split": "dev",
+      "k1": 8,
+      "n": 19,
+      "recall_before": 0.9473684210526315,
+      "recall_after": 0.8421052631578947,
+      "mrr": 0.7412280701754387,
+      "precision": 0.1118421052631579,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 0,
+      "tokens": 2093.1052631578946,
+      "ms": 5.587368421052631,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "D01",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D02",
+          "type": "synonym",
+          "rank_before": 4,
+          "rank_after": 4,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D03",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D04",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D05",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D06",
+          "type": "synonym",
+          "rank_before": 9,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D07",
+          "type": "conflict",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D08",
+          "type": "conflict",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D09",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D10",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D11",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D12",
+          "type": "synonym",
+          "rank_before": 3,
+          "rank_after": 3,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D13",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D14",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D15",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D16",
+          "type": "followup",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D17",
+          "type": "synonym",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D18",
+          "type": "synonym",
+          "rank_before": 11,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "D19",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        }
+      ]
+    },
+    {
+      "name": "hybrid",
+      "split": "test",
+      "k1": 3,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.625,
+      "mrr": 0.5625,
+      "precision": 0.25,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 2,
+      "tokens": 795.7,
+      "ms": 6.2741,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rank_before": 5,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rank_before": 6,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rank_before": 6,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "hybrid",
+      "split": "test",
+      "k1": 5,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 0.75,
+      "mrr": 0.5875,
+      "precision": 0.175,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 2,
+      "tokens": 1275.6,
+      "ms": 6.2741,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rank_before": 6,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rank_before": 6,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "hybrid",
+      "split": "test",
+      "k1": 8,
+      "n": 8,
+      "recall_before": 1,
+      "recall_after": 1,
+      "mrr": 0.6291666666666668,
+      "precision": 0.15625,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 2,
+      "tokens": 2068.9,
+      "ms": 6.2741,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "T01",
+          "type": "fact",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T02",
+          "type": "number",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T03",
+          "type": "conflict",
+          "rank_before": 5,
+          "rank_after": 5,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T04",
+          "type": "section",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T11",
+          "type": "compare",
+          "rank_before": 1,
+          "rank_after": 1,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T06",
+          "type": "multihop",
+          "rank_before": 2,
+          "rank_after": 2,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T07",
+          "type": "synonym",
+          "rank_before": 6,
+          "rank_after": 6,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T08",
+          "type": "followup",
+          "rank_before": 6,
+          "rank_after": 6,
+          "kept": 8,
+          "empty": false,
+          "answerable": true
+        },
+        {
+          "id": "T09",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "T10",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "hybrid",
+      "split": "out",
+      "k1": 3,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 8,
+      "tokens": 883,
+      "ms": 5.1045,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 3,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "hybrid",
+      "split": "out",
+      "k1": 5,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 8,
+      "tokens": 1504.25,
+      "ms": 5.1045,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 5,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    },
+    {
+      "name": "hybrid",
+      "split": "out",
+      "k1": 8,
+      "n": 0,
+      "recall_before": 0,
+      "recall_after": 0,
+      "mrr": 0,
+      "precision": 0,
+      "cut_share": 0,
+      "wrong_cut": 0,
+      "out_empty": 0,
+      "out_n": 8,
+      "tokens": 2360.375,
+      "ms": 5.1045,
+      "cost_usd": 0,
+      "rows": [
+        {
+          "id": "O01",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O02",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O03",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O04",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O05",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O06",
+          "type": "out-of-base",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O07",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        },
+        {
+          "id": "O08",
+          "type": "aspect-missing",
+          "rank_before": 0,
+          "rank_after": 0,
+          "kept": 8,
+          "empty": false,
+          "answerable": false,
+          "unanswerable": true
+        }
+      ]
+    }
+  ],
+  "conclusion": [
+    "K1 = 5, dev+test, 27 вопросов с доказательством: доказательство в итоговой выдаче — base 22, filter 21 (−T06), rewrite 27 (+D02, D17, D18, T03, T07), both 25 (+D02, D17, D18, T03, T07; −D16, T06), hybrid 22 (+D02, T03; −D06, T08).",
+    "Неотвечаемые (out и answerable=false, 10): пусто после фильтра — base 0, filter 7, rewrite 0, both 7, hybrid 0 из 10.",
+    "Токенов итоговых фрагментов на вопрос (K1 = 5, все наборы): base 1415, filter 947, rewrite 1359, both 887, hybrid 1334.",
+    "filter: фильтр отсёк в среднем 72 % кандидатов; фильтр отсёк доказательство, которое base показывал: T06 (ранг до 2).",
+    "both: фильтр отсёк в среднем 67 % кандидатов; фильтр отсёк доказательство, которое base показывал: T06 (ранг до 2); ушло за K1 после реранкинга: D16 (ранг 12).",
+    "Выборка мала: 27 отвечаемых и 10 неотвечаемых вопросов — один вопрос это 0.04 доли recall; выводы — по вопросам, а не по долям, и только как направление."
+  ],
+  "k0": 20,
+  "configs": [
+    {
+      "name": "base",
+      "config": {
+        "Index": "structure",
+        "K0": 20,
+        "K1": 0
+      }
+    },
+    {
+      "name": "filter",
+      "config": {
+        "Index": "structure",
+        "K0": 20,
+        "K1": 0,
+        "filter": true,
+        "min_score": 0.825
+      }
+    },
+    {
+      "name": "rewrite",
+      "config": {
+        "Index": "structure",
+        "K0": 20,
+        "K1": 0,
+        "rewrite": "code"
+      }
+    },
+    {
+      "name": "both",
+      "config": {
+        "Index": "structure",
+        "K0": 20,
+        "K1": 0,
+        "rewrite": "code",
+        "rerank": "hybrid",
+        "filter": true,
+        "min_score": 0.825
+      }
+    },
+    {
+      "name": "hybrid",
+      "config": {
+        "Index": "structure",
+        "K0": 20,
+        "K1": 0,
+        "rerank": "hybrid"
+      }
+    }
+  ]
+}

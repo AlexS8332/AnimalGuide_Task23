@@ -11,6 +11,7 @@ import (
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/corpus"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/kb"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/llm"
+	"github.com/AlexS8332/AnimalGuide_Task23/internal/retrieve"
 )
 
 // Eval прогоняет вопросы набора в режимах.
@@ -31,14 +32,13 @@ func Eval(ctx context.Context, a *Answerer, qs kb.QuestionSet, o EvalOptions) (R
 		modes = []Mode{NoRAG, RAG}
 	}
 	for _, m := range modes {
-		switch m {
-		case NoRAG:
-		case RAG:
-			if a.Searcher == nil {
-				return Report{}, errors.New("режим rag без базы знаний: соберите её командой kb index")
-			}
-		default:
-			return Report{}, fmt.Errorf("неизвестный режим %q (norag, rag)", m)
+		switch {
+		case !m.Known():
+			return Report{}, fmt.Errorf("неизвестный режим %q (%s)", m, modeList())
+		case m == RAG && a.Searcher == nil:
+			return Report{}, errors.New("режим rag без базы знаний: соберите её командой kb index")
+		case m.Pipelined() && (a.Pipeline == nil || a.Pipeline.Searcher == nil):
+			return Report{}, fmt.Errorf("режим %s без конвейера поиска (Answerer.Pipeline)", m)
 		}
 	}
 	repeats := max(o.Repeats, 1)
@@ -55,14 +55,18 @@ func Eval(ctx context.Context, a *Answerer, qs kb.QuestionSet, o EvalOptions) (R
 	}
 
 	rep := Report{Created: time.Now(), Model: a.model(), Index: a.index(), K: a.k(), Repeats: repeats}
-	ev := &evidenceIndex{s: a.Searcher, texts: map[string]string{}}
-	if a.Searcher != nil {
-		if m, err := a.Searcher.Store.Manifest(ctx); err == nil {
+	searcher := a.Searcher
+	if searcher == nil && a.Pipeline != nil {
+		searcher = a.Pipeline.Searcher
+	}
+	ev := &evidenceIndex{s: searcher, texts: map[string]string{}}
+	if searcher != nil {
+		if m, err := searcher.Store.Manifest(ctx); err == nil {
 			rep.CorpusSHA = m.CorpusSHA
 		}
 		rep.Embedder = "нет — поиск BM25"
-		if a.Searcher.Embedder != nil {
-			rep.Embedder = a.Searcher.Embedder.Model()
+		if searcher.Embedder != nil {
+			rep.Embedder = searcher.Embedder.Model()
 		}
 	}
 	rng := rand.New(rand.NewSource(o.Seed))
@@ -82,7 +86,9 @@ func Eval(ctx context.Context, a *Answerer, qs kb.QuestionSet, o EvalOptions) (R
 				} else {
 					run.Rule = Rule(q, ans.Text)
 					run.Final = run.Rule.Verdict
-					if m == RAG {
+					if m.UsesBase() {
+						// Recall — по выдаче, которую увидела модель: у режимов
+						// v23 это итог конвейера после фильтра.
 						run.Recall = ev.covered(ctx, q, ans.Hits)
 						if ans.Search.Fallback != "" && fallback == "" {
 							fallback = ans.Search.Fallback
@@ -259,7 +265,7 @@ func modeStats(m Mode, rows []Row) ModeStats {
 			ms += r.Answer.Millis
 			st.Usage = st.Usage.Add(r.Answer.Usage)
 			st.Cost = st.Cost.Add(r.Answer.Cost)
-			if m == RAG && q.Answerable && len(q.Evidence) > 0 {
+			if m.UsesBase() && q.Answerable && len(q.Evidence) > 0 {
 				recallN++
 				if r.Recall {
 					recallHit++
@@ -356,9 +362,14 @@ func conclude(r Report) []string {
 				s.Mode, s.Correct, s.Questions, s.Partial, s.Wrong, s.Abstain))
 		}
 	}
-	if hasRAG {
-		out = append(out, fmt.Sprintf("Доказательство в выдаче rag (индекс %s, k = %d): %.0f %% прогонов на отвечаемых вопросах.",
-			r.Index, r.K, 100*ra.Recall))
+	for _, s := range r.Stats {
+		if s.Mode.Pipelined() && hasRAG && hasNo {
+			out = append(out, fmt.Sprintf("%s: верно %d из %d (rag %d) — разница с rag %+d.", s.Mode, s.Correct, s.Questions, ra.Correct, s.Correct-ra.Correct))
+		}
+		if s.Mode.UsesBase() {
+			out = append(out, fmt.Sprintf("Доказательство в выдаче %s (индекс %s, k = %d): %.0f %% прогонов на отвечаемых вопросах.",
+				s.Mode, r.Index, r.K, 100*s.Recall))
+		}
 	}
 	if hasRAG && hasNo && ra.Discriminative > 0 {
 		out = append(out, fmt.Sprintf("Дискриминативные вопросы (без базы модель их не знает, %d): верно rag %d, norag %d — разница %+d (на них разница — вклад базы, а не общих знаний модели).",
@@ -529,4 +540,43 @@ func RecallAt(rows []RankRow, k int) (float64, int) {
 		return 0, 0
 	}
 	return float64(hit) / float64(len(rows)), hit
+}
+
+// PipelineRanks — то же, что Ranks, но через конвейер retrieve с
+// настройками c (режимы v23, добавление): ранг первого релевантного
+// фрагмента в итоговой выдаче конвейера (после фильтра) при K1 =
+// RankDepth; 0 — его нет (не найден или отсечён). RecallAt по этим строкам —
+// «доказательство в топ-k после фильтра».
+func PipelineRanks(ctx context.Context, p *retrieve.Pipeline, qs kb.QuestionSet, splits []string, c retrieve.Config) ([]RankRow, kb.SearchInfo, error) {
+	if p == nil || p.Searcher == nil {
+		return nil, kb.SearchInfo{}, errors.New("нет базы знаний")
+	}
+	ev := &evidenceIndex{s: p.Searcher, texts: map[string]string{}}
+	c.K1 = RankDepth
+	c.K0 = max(c.K0, RankDepth)
+	var out []RankRow
+	var info kb.SearchInfo
+	for _, sp := range splits {
+		for _, q := range qs.Split(sp) {
+			if !q.Answerable || len(ev.of(ctx, q)) == 0 {
+				continue
+			}
+			t, err := p.Search(ctx, retrieve.Query{Text: q.Q, Context: q.Context}, c)
+			if err != nil {
+				return out, info, fmt.Errorf("%s: %w", q.ID, err)
+			}
+			if info.Mode == "" || t.Info.Fallback != "" {
+				info = t.Info
+			}
+			row := RankRow{ID: q.ID, Split: sp}
+			for i, h := range t.Hits {
+				if ev.covered(ctx, q, []kb.Hit{h}) {
+					row.Rank = i + 1
+					break
+				}
+			}
+			out = append(out, row)
+		}
+	}
+	return out, info, nil
 }

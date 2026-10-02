@@ -40,7 +40,7 @@ func (r Report) Markdown() string {
 	un := r.unanswerable()
 	for _, s := range r.Stats {
 		recall, agree := "—", "—"
-		if s.Mode == RAG {
+		if s.Mode.UsesBase() {
 			recall = fmt.Sprintf("%.0f %%", 100*s.Recall)
 		}
 		if s.Judged > 0 {

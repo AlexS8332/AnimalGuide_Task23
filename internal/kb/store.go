@@ -521,7 +521,7 @@ func (s *Store) Build(ctx context.Context, ch Chunker, emb embed.Embedder, p Pro
 		ON CONFLICT (index_id) DO UPDATE SET strategy = excluded.strategy, params = excluded.params,
 			embedder = excluded.embedder, dims = excluded.dims, corpus_sha = excluded.corpus_sha,
 			chunks = excluded.chunks, tokens = excluded.tokens, built_at = excluded.built_at,
-			seconds = excluded.seconds`,
+			seconds = excluded.seconds, min_score = 0`,
 		info.ID, string(info.Strategy), string(params), info.Embedder, info.Dims, info.CorpusSHA,
 		info.Chunks, info.Tokens, info.BuiltAt.Format(time.RFC3339Nano), info.Seconds); err != nil {
 		return IndexInfo{}, err
@@ -700,7 +700,18 @@ func clean(s string) string { return strings.Join(strings.Fields(s), " ") }
 
 // SetMinScore записывает порог релевантности индекса (калибровка v23,
 // retrieve.Calibrate). Пересборка индекса порог сбрасывает: он подобран для
-// этих векторов.
+// этих векторов (Build пишет min_score = 0). Порог — косинус, поэтому
+// допустим [0, 1): 0 — «не задан», и поиск берёт умолчание конвейера.
 func (s *Store) SetMinScore(ctx context.Context, indexID string, v float64) error {
-	return ErrNotImplemented
+	if math.IsNaN(v) || v < 0 || v >= 1 {
+		return fmt.Errorf("порог %v вне [0, 1)", v)
+	}
+	res, err := s.db.ExecContext(ctx, `UPDATE kb_indexes SET min_score = ? WHERE index_id = ?`, v, indexID)
+	if err != nil {
+		return err
+	}
+	if n, err := res.RowsAffected(); err == nil && n == 0 {
+		return fmt.Errorf("%w: %s", ErrNoIndex, indexID)
+	}
+	return nil
 }

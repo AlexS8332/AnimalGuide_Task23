@@ -18,7 +18,7 @@ func init() {
 
 func runAsk(ctx context.Context, args []string, out, errOut io.Writer) int {
 	fs := newFlagSet("ask", `[флаги] "вопрос"`, errOut)
-	mode := fs.String("mode", "both", "режим: norag (без базы), rag (с базой) или both")
+	mode := fs.String("mode", "both", "режимы через запятую: norag (без базы), rag (с базой), rag+filter, rag+rewrite, rag+both; both — norag и rag")
 	var prior listFlag
 	fs.Var(&prior, "context", "предыдущая реплика пользователя (вопрос-продолжение); флаг можно повторять")
 	af := newAnswerFlags(fs)
@@ -49,7 +49,7 @@ func runAsk(ctx context.Context, args []string, out, errOut io.Writer) int {
 		fmt.Fprintln(errOut, "ошибка:", err)
 		return exitUsage
 	}
-	a, closeKB, code := af.answerer(ctx, hasMode(modes, rag.RAG), errOut)
+	a, closeKB, code := af.answerer(ctx, needsKB(modes), errOut)
 	if code >= 0 {
 		return code
 	}
@@ -68,7 +68,10 @@ func runAsk(ctx context.Context, args []string, out, errOut io.Writer) int {
 		}
 		total = total.Add(ans.Cost)
 		fmt.Fprintf(out, "== %s ==\n", m)
-		if m == rag.RAG {
+		if m.UsesBase() {
+			if t := ans.Trace; t != nil && t.Rewritten != t.Original {
+				fmt.Fprintf(out, "Запрос в поиск: %s\n", t.Rewritten)
+			}
 			line := fmt.Sprintf("Найдено (%s, %s", ans.Search.Index, ans.Search.Mode)
 			if ans.Search.Embedder != "" {
 				line += " " + ans.Search.Embedder

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/kb"
+	"github.com/AlexS8332/AnimalGuide_Task23/internal/retrieve"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/tools"
 )
 
@@ -47,13 +48,19 @@ type SearchHit struct {
 	Text    string  `json:"text"`
 }
 
-// SearchResult — ответ kb_search целиком.
+// SearchResult — ответ kb_search целиком. Rewritten, Filtered, Note — у
+// поиска через конвейер (механизмы rag.rewrite и rag.filter, v23): что
+// ушло в поиск вместо query, сколько кандидатов отсечено фильтром и
+// заметка (пустой итог, откат на BM25).
 type SearchResult struct {
-	Query    string      `json:"query"`
-	Index    string      `json:"index"`
-	Mode     kb.Mode     `json:"mode"`
-	Fallback string      `json:"fallback,omitempty"`
-	Hits     []SearchHit `json:"hits"`
+	Query     string      `json:"query"`
+	Rewritten string      `json:"rewritten,omitempty"`
+	Index     string      `json:"index"`
+	Mode      kb.Mode     `json:"mode"`
+	Fallback  string      `json:"fallback,omitempty"`
+	Filtered  int         `json:"filtered,omitempty"`
+	Note      string      `json:"note,omitempty"`
+	Hits      []SearchHit `json:"hits"`
 }
 
 // SearchTool — kb_search{query, k}: поиск по индексу базы знаний. Untrusted:
@@ -104,6 +111,79 @@ func SearchTool(s *kb.Searcher, index string, k int) tools.Tool {
 			return tools.Result(out)
 		},
 	}
+}
+
+// PipelineTool — kb_search через конвейер retrieve (механизмы rag.filter и
+// rag.rewrite, v23): та же схема и то же описание, что у SearchTool, а
+// выдача — итог конвейера с настройками c (K1 — k вызова). Context —
+// прошлые реплики человека: по ним rewrite находит вид для вопроса-
+// продолжения («а сколько она весит?»), и вызов моделью получает тот же
+// контекст, что вызов кодом. Ответ — кратко: переписанный запрос (если
+// переписан), сколько отсечено фильтром и заметка; полный путь поиска — в
+// окне «База знаний».
+func PipelineTool(p *retrieve.Pipeline, c retrieve.Config, history []string, k int) tools.Tool {
+	k = orK(k)
+	c.Index = orIndex(c.Index)
+	return tools.Func{
+		S: tools.Spec{Name: ToolName, Description: searchDescription, Parameters: json.RawMessage(searchSchema),
+			Untrusted: true, Via: tools.ViaLocal},
+		Fn: func(ctx context.Context, args json.RawMessage) (string, error) {
+			if p == nil || p.Searcher == nil {
+				return "", errors.New("базы знаний нет")
+			}
+			var in struct {
+				Query string `json:"query"`
+				K     int    `json:"k"`
+			}
+			if err := tools.ParseArgs(args, &in); err != nil {
+				return "", err
+			}
+			in.Query = strings.TrimSpace(in.Query)
+			if in.Query == "" {
+				return "", errors.New("пустой запрос: передай query")
+			}
+			cc := c
+			cc.K1 = k
+			if in.K > 0 {
+				cc.K1 = orK(in.K)
+			}
+			t, err := p.Search(ctx, retrieve.Query{Text: in.Query, Context: history}, cc)
+			if err != nil {
+				return "", fmt.Errorf("поиск по базе знаний: %w", err)
+			}
+			out := SearchResult{Query: in.Query, Index: t.Info.Index, Mode: t.Info.Mode, Fallback: t.Info.Fallback,
+				Hits: make([]SearchHit, 0, len(t.Hits))}
+			if t.Rewritten != "" && t.Rewritten != t.Original {
+				out.Rewritten = t.Rewritten
+			}
+			for _, x := range t.Candidates {
+				if x.FilterCut() {
+					out.Filtered++
+				}
+			}
+			if cc.Filter && t.Empty {
+				out.Note = "фильтр релевантности отсёк всё: в базе знаний ответа, вероятно, нет"
+			}
+			if t.Info.Fallback != "" && cc.Filter {
+				out.Note = joinNote(out.Note, "поиск без векторов — порог только относительный")
+			}
+			for _, h := range t.Hits {
+				out.Hits = append(out.Hits, SearchHit{ChunkID: h.ID, Title: h.Title, Section: h.Section, Path: pathOf(h.Chunk),
+					Score: math.Round(h.Score*1000) / 1000, URL: h.URL, Text: h.Text})
+			}
+			return tools.Result(out)
+		},
+	}
+}
+
+func joinNote(a, b string) string {
+	switch {
+	case a == "":
+		return b
+	case b == "":
+		return a
+	}
+	return a + "; " + b
 }
 
 // Compose — блок контекста для модели: по фрагменту на абзац с заголовком
