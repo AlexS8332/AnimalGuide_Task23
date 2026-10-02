@@ -1,10 +1,7 @@
 package retrieve
 
 import (
-	"context"
 	"time"
-
-	"github.com/AlexS8332/AnimalGuide_Task23/internal/kb"
 )
 
 // Named — конфигурация с именем для матрицы режимов.
@@ -12,11 +9,6 @@ type Named struct {
 	Name   string `json:"name"` // "base", "filter", "rewrite", "both", "hybrid", "llm-rerank", "llm-rewrite"
 	Config Config `json:"config"`
 }
-
-// Presets — матрица режимов задания 23: base (без фильтра и rewrite),
-// filter, rewrite (code), both (filter + rewrite + hybrid); дополнительные
-// платные строки llm-rewrite и llm-rerank — только по запросу.
-func Presets(paid bool) []Named { return nil }
 
 // MatrixRow — метрики поиска одной конфигурации на наборе.
 type MatrixRow struct {
@@ -56,6 +48,12 @@ type MatrixQ struct {
 	RankAfter int    `json:"rank_after"`  // в итоге; 0 — нет
 	Kept      int    `json:"kept"`
 	Empty     bool   `json:"empty"`
+	// Answerable — у вопроса есть ответ в базе и доказательство найдено в
+	// тексте документа (входит в N); иначе вопрос — в OutN, если он
+	// неотвечаемый (добавление v23).
+	Answerable bool `json:"answerable"`
+	// Unanswerable — вопрос без ответа в базе (out и answerable=false).
+	Unanswerable bool `json:"unanswerable,omitempty"`
 }
 
 // Matrix — сравнение конфигураций на наборах и при разных K1 (без модели,
@@ -71,15 +69,12 @@ type Matrix struct {
 	// Conclusion — вывод кодом, числами, с вопросами вместо долей там, где
 	// выборка мала.
 	Conclusion []string `json:"conclusion"`
+	// K0 — кандидатов; Fallback — почему поиск шёл не по векторам (пусто —
+	// по векторам); Configs — сравниваемые конфигурации (добавления v23).
+	K0       int     `json:"k0"`
+	Fallback string  `json:"fallback,omitempty"`
+	Configs  []Named `json:"configs"`
 }
-
-// RunMatrix — матрица по конфигурациям × K1 × наборам.
-func RunMatrix(ctx context.Context, p *Pipeline, qs kb.QuestionSet, configs []Named, k1s []int, splits []string) (Matrix, error) {
-	return Matrix{}, ErrNotImplemented
-}
-
-// Markdown — для examples/rag/filter.md.
-func (m Matrix) Markdown() string { return "" }
 
 // CalibRow — порог и его последствия на dev+out.
 type CalibRow struct {
@@ -108,10 +103,14 @@ type Calibration struct {
 	// гистограммы в отчёте и окне).
 	DevTop []float64 `json:"dev_top"`
 	OutTop []float64 `json:"out_top"`
-}
-
-// Calibrate подбирает порог и (если write) пишет его в индекс
-// (kb.Store.SetMinScore).
-func Calibrate(ctx context.Context, p *Pipeline, qs kb.QuestionSet, index string, delta, maxDrop float64, write bool) (Calibration, error) {
-	return Calibration{}, ErrNotImplemented
+	// Created, DevN, OutN, Written, Note — когда, сколько вопросов, записан
+	// ли порог в индекс и оговорки (добавления v23).
+	Created time.Time `json:"created"`
+	DevN    int       `json:"dev_n"`
+	OutN    int       `json:"out_n"`
+	Written bool      `json:"written"`
+	// Anchored — вопросы, в запросе которых назван вид корпуса: пол к ним
+	// не применяется (Trace.Anchored).
+	Anchored []string `json:"anchored,omitempty"`
+	Note     string   `json:"note,omitempty"`
 }

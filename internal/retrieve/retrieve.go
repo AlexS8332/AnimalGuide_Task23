@@ -17,14 +17,16 @@
 package retrieve
 
 import (
-	"context"
 	"errors"
+	"sync"
+	"time"
 
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/kb"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/llm"
 )
 
-// ErrNotImplemented — заглушка контракта.
+// ErrNotImplemented — заглушка контракта (оставлена для совместимости:
+// реализация конвейера полная).
 var ErrNotImplemented = errors.New("не реализовано")
 
 // Rewrite — как переписывать запрос.
@@ -70,8 +72,9 @@ type Config struct {
 	MinScore float64 `json:"min_score,omitempty"`
 	// Delta — относительный порог: косинус ≥ лучший − Delta; 0 → DefaultDelta.
 	Delta float64 `json:"delta,omitempty"`
-	// Dedupe — отсев повторов: один фрагмент на раздел документа (лучший).
-	// Включается вместе с Filter.
+	// Dedupe — отсев повторов: включается вместе с Filter. С v23 — повтор
+	// ТЕКСТА (тот же text_sha или перекрытие ≥ половины фрагмента), а не
+	// «один фрагмент на раздел»: почему — retrieve.duplicate.
 }
 
 // Умолчания до калибровки (по живому индексу e5-base v21: косинусы
@@ -95,7 +98,7 @@ type Candidate struct {
 	Final     int     `json:"final"`  // ранг после реранкинга, с 1
 	Kept      bool    `json:"kept"`
 	// Reason — почему отсечён: "порог 0.80", "хуже лучшего на 0.05",
-	// "повтор раздела", "за пределами K1"; пусто — остался.
+	// "повтор текста", "за пределами K1"; пусто — остался.
 	Reason string `json:"reason,omitempty"`
 }
 
@@ -106,7 +109,12 @@ type Trace struct {
 	Queries   []string `json:"queries"`   // что ушло в поиск
 	RewriteBy string   `json:"rewrite_by,omitempty"`
 	// Expanded — какие синонимы раскрыты кодом: "кошачий медведь → малая панда".
-	Expanded   []string      `json:"expanded,omitempty"`
+	Expanded []string `json:"expanded,omitempty"`
+	// Anchored — виды корпуса, названные в запросах поиска (каноном,
+	// синонимом или латынью; добавление v23). Названный вид — якорь: статья
+	// о нём в базе есть, и абсолютный пол косинуса к такому запросу не
+	// применяется (см. Pipeline.Search).
+	Anchored   []string      `json:"anchored,omitempty"`
 	Config     Config        `json:"config"`
 	MinScore   float64       `json:"min_score"` // фактический порог
 	Candidates []Candidate   `json:"candidates"`
@@ -120,6 +128,10 @@ type Trace struct {
 	Cost     llm.Cost  `json:"cost"`
 	Millis   int64     `json:"ms"`
 	Note     string    `json:"note,omitempty"` // например, «BM25: абсолютного порога нет»
+
+	// scores — оценки модели-реранкера по chunk_id; nil — их нет (другой
+	// реранкинг или модель ответила неразборчиво).
+	scores map[string]float64
 }
 
 // Query — что ищем. Context — предыдущие реплики человека (для
@@ -137,11 +149,10 @@ type Pipeline struct {
 	Model string
 	// Aliases — словарь названий; nil — строится из базы при первом вызове.
 	Aliases *Aliases
-}
+	// Now — часы для прайса; nil — time.Now.
+	Now func() time.Time
 
-// Search — поиск в два этапа по настройкам.
-func (p *Pipeline) Search(ctx context.Context, q Query, c Config) (Trace, error) {
-	return Trace{}, ErrNotImplemented
+	mu sync.Mutex // охраняет ленивую загрузку Aliases
 }
 
 // Aliases — названия видов корпуса: канон (русское название статьи) и
@@ -152,15 +163,8 @@ type Aliases struct {
 	Canon map[string]string
 	// Latin — канон → латынь.
 	Latin map[string]string
+
+	// Индекс сопоставления строится из Canon при первом вызове (aliases.go).
+	once sync.Once
+	ix   *matchIndex
 }
-
-// LoadAliases — словарь из документов базы (kb.Store.Doc → Species).
-func LoadAliases(ctx context.Context, st *kb.Store) (*Aliases, error) { return nil, ErrNotImplemented }
-
-// Expand — запрос с раскрытыми синонимами и список раскрытого. Канон уже в
-// запросе — ничего не добавляется.
-func (a *Aliases) Expand(q string) (string, []string) { return q, nil }
-
-// Species — канонические названия видов, упомянутых в тексте (для
-// вопросов-продолжений: вид из контекста).
-func (a *Aliases) Species(text string) []string { return nil }

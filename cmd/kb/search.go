@@ -9,10 +9,11 @@ import (
 	"strings"
 
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/kb"
+	"github.com/AlexS8332/AnimalGuide_Task23/internal/retrieve"
 )
 
 func init() {
-	register("search", "найти в базе знаний: топ чанков с баллами и путём раздела", runSearch)
+	register("search", "найти в базе знаний: топ чанков с баллами и путём раздела (с -rewrite/-rerank/-filter — второй этап поиска)", runSearch)
 }
 
 func runSearch(ctx context.Context, args []string, out, errOut io.Writer) int {
@@ -22,6 +23,7 @@ func runSearch(ctx context.Context, args []string, out, errOut io.Writer) int {
 	k := fs.Int("k", kb.DefaultK, "сколько чанков показать")
 	mode := fs.String("mode", "dense", "режим: dense (с откатом на BM25) или bm25")
 	which := embedderFlag(fs)
+	pf := newPipeFlags(fs)
 	// Вопрос — позиционный аргумент; флаги можно писать и после него.
 	var query []string
 	rest := args
@@ -46,6 +48,16 @@ func runSearch(ctx context.Context, args []string, out, errOut io.Writer) int {
 	}
 	if *mode != string(kb.Dense) && *mode != string(kb.BM25) {
 		fmt.Fprintf(errOut, "ошибка: неизвестный режим %q (dense, bm25)\n", *mode)
+		return exitUsage
+	}
+	cfg, err := pf.config(*k)
+	if err != nil {
+		fmt.Fprintln(errOut, "ошибка:", err)
+		return exitUsage
+	}
+	piped := pf.on()
+	if piped && *mode == string(kb.BM25) {
+		fmt.Fprintln(errOut, "ошибка: -mode bm25 и второй этап поиска несовместимы: конвейер сам ищет dense и BM25")
 		return exitUsage
 	}
 	st, err := openExisting(ctx, *dbPath)
@@ -81,9 +93,32 @@ func runSearch(ctx context.Context, args []string, out, errOut io.Writer) int {
 		}
 		s.Embedder = emb
 	}
+	var p *retrieve.Pipeline
+	if piped {
+		p = &retrieve.Pipeline{Searcher: s}
+		if cfg.Rewrite == retrieve.RewriteLLM || cfg.Rerank == retrieve.RerankLLM {
+			llmc, model, err := chatModel()
+			if err != nil {
+				fmt.Fprintln(errOut, "ошибка:", err)
+				return exitUsage
+			}
+			p.LLM, p.Model = llmc, model
+		}
+	}
 	for i, id := range ids {
 		if i > 0 {
 			fmt.Fprintln(out)
+		}
+		if p != nil {
+			c := cfg
+			c.Index = id
+			t, err := p.Search(ctx, retrieve.Query{Text: q, Context: pf.context}, c)
+			if err != nil {
+				fmt.Fprintln(errOut, "ошибка:", err)
+				return exitFailed
+			}
+			printTrace(out, t, *pf.trace)
+			continue
 		}
 		hits, info, err := s.Search(ctx, q, kb.SearchOptions{Index: id, K: *k, Mode: kb.Mode(*mode)})
 		if err != nil {
