@@ -697,3 +697,10 @@ func (s *Store) indexBytes(ctx context.Context, id string) (int64, error) {
 
 // clean — пробелы и переводы строк в одну строку (для коротких выдержек).
 func clean(s string) string { return strings.Join(strings.Fields(s), " ") }
+
+// SetMinScore записывает порог релевантности индекса (калибровка v23,
+// retrieve.Calibrate). Пересборка индекса порог сбрасывает: он подобран для
+// этих векторов.
+func (s *Store) SetMinScore(ctx context.Context, indexID string, v float64) error {
+	return ErrNotImplemented
+}

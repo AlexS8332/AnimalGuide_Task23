@@ -28,6 +28,7 @@ import (
 
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/kb"
 	"github.com/AlexS8332/AnimalGuide_Task23/internal/llm"
+	"github.com/AlexS8332/AnimalGuide_Task23/internal/retrieve"
 )
 
 // ErrNotImplemented — заглушка контракта.
@@ -39,7 +40,18 @@ type Mode string
 const (
 	NoRAG Mode = "norag"
 	RAG   Mode = "rag"
+	// Режимы v23 — RAG с конвейером retrieve (второй этап поиска). Модель и
+	// промпт те же, что у RAG: отличается только, какие фрагменты дошли.
+	RAGFilter  Mode = "rag+filter"  // фильтр релевантности и отсев дублей
+	RAGRewrite Mode = "rag+rewrite" // переписывание запроса кодом (синонимы, контекст)
+	RAGBoth    Mode = "rag+both"    // переписывание + гибридный реранкинг + фильтр
 )
+
+// Pipelined — режим идёт через конвейер retrieve (а не прямой поиск).
+func (m Mode) Pipelined() bool { return m == RAGFilter || m == RAGRewrite || m == RAGBoth }
+
+// UsesBase — режим с базой знаний.
+func (m Mode) UsesBase() bool { return m != NoRAG }
 
 // Умолчания поиска для ответа.
 const (
@@ -68,6 +80,9 @@ type Answer struct {
 	Usage  llm.Usage     `json:"usage"`
 	Cost   llm.Cost      `json:"cost"`
 	Millis int64         `json:"ms"`
+	// Trace — путь поиска через конвейер retrieve (режимы v23); nil у
+	// прямого поиска и norag.
+	Trace *retrieve.Trace `json:"trace,omitempty"`
 	// Prompt — что ушло модели (для вкладки и отчёта): system и user.
 	System string `json:"system"`
 	User   string `json:"user"`
@@ -82,7 +97,15 @@ type Answerer struct {
 	K        int    // 0 — DefaultK
 	// Now — часы для прайса (пик/не пик); nil — time.Now.
 	Now func() time.Time
+	// Pipeline — второй этап поиска (v23) для режимов Pipelined; nil —
+	// эти режимы — ошибка. Configs — настройки режимов поверх
+	// умолчаний ModeConfig.
+	Pipeline *retrieve.Pipeline
+	Configs  map[Mode]retrieve.Config
 }
+
+// ModeConfig — настройки конвейера по умолчанию для режима v23.
+func ModeConfig(m Mode) retrieve.Config { return retrieve.Config{} }
 
 // Verdict — оценка ответа.
 type Verdict string
