@@ -80,9 +80,17 @@ func resolve(c Config) Config {
 // списках, а не одним косинусом. Ниже половины K1 — общие правила. При
 // RerankLLM так же освобождён кандидат с оценкой модели 3.
 //
-// Якорь (Trace.Anchored): если в запросе поиска назван вид корпуса
-// (каноном, синонимом, латынью; у продолжения без переписывания — в
-// контексте), абсолютный пол не применяется. Пол нужен, чтобы сказать «в
+// Контекст (Query.Context) — только для переписывания: без Rewrite в поиск
+// идёт одна реплика, а RewriteCode берёт из контекста вид, только если
+// реплика — продолжение (см. rewriteCode).
+//
+// Относительный порог меряется от лучшего косинуса СВОЕГО запроса: у
+// подзапросов RewriteLLM («вес харзы» и «вес барханного кота») лучшие
+// разные, и общий лучший отсекал бы всё найденное по второму.
+//
+// Якорь (Trace.Anchored): если в самой реплике назван вид корпуса
+// (каноном, синонимом, латынью; вид, унаследованный из контекста, якорем
+// не считается), абсолютный пол не применяется. Пол нужен, чтобы сказать «в
 // базе об этом ничего нет», а статья о названном виде в базе есть точно;
 // есть ли в ней нужный аспект («сколько лет живёт харза»), косинус не
 // различает — у таких вопросов лучший косинус 0.85–0.88, выше любого
@@ -137,23 +145,30 @@ func (p *Pipeline) gather(ctx context.Context, q Query, c Config) (Trace, error)
 		return t, err
 	}
 
-	// 1. Запросы.
+	// 1. Запросы. Без переписывания — одна реплика: контекст нужен только
+	// переписыванию, а склейка с прошлыми репликами тянула бы поиск к
+	// прошлой теме («Где водится харза?» → «Сколько весит жираф?»).
 	switch c.Rewrite {
 	case RewriteNone:
 		t.Rewritten = t.Original
-		t.Queries = []string{joinContext(q)}
+		t.Queries = []string{t.Original}
 	case RewriteCode:
 		t.RewriteBy = string(RewriteCode)
-		t.Rewritten, t.Expanded, t.Note = rewriteCode(al, q)
+		var bm25 string
+		t.Rewritten, bm25, t.Expanded, t.Note = rewriteCode(al, q)
 		t.Queries = []string{t.Rewritten}
+		t.QueriesBM25 = []string{bm25}
 	case RewriteLLM:
 		if err := p.rewriteLLM(ctx, al, q, &t); err != nil {
 			return t, err
 		}
 	}
+	if len(t.QueriesBM25) > 0 && strings.Join(t.QueriesBM25, "\x00") == strings.Join(t.Queries, "\x00") {
+		t.QueriesBM25 = nil
+	}
 
-	// Виды корпуса, названные в том, что ушло в поиск (якорь для пола).
-	t.Anchored = al.Species(strings.Join(t.Queries, " "))
+	// Якорь — виды, названные в самой реплике (не из контекста).
+	t.Anchored = al.Species(t.Original)
 
 	// 2. Кандидаты.
 	if err := p.candidates(ctx, c, &t); err != nil {
@@ -161,13 +176,7 @@ func (p *Pipeline) gather(ctx context.Context, q Query, c Config) (Trace, error)
 	}
 	dense := t.Info.Mode == kb.Dense
 	if dense {
-		t.MinScore = c.MinScore
-		if t.MinScore <= 0 {
-			t.MinScore = idx.MinScore
-		}
-		if t.MinScore <= 0 {
-			t.MinScore = DefaultMinScore
-		}
+		t.MinScore, t.MinScoreFrom = MinScoreOf(c, idx)
 	} else {
 		t.Note = joinNote(t.Note, noteBM25+" (поиск без векторов: "+orText(t.Info.Fallback, "нет эмбеддера")+")")
 	}
@@ -182,8 +191,44 @@ func (p *Pipeline) gather(ctx context.Context, q Query, c Config) (Trace, error)
 	return t, nil
 }
 
-// joinContext — запрос без переписывания: предыдущие реплики и вопрос через
-// пробел (как rag.Question.Query и kb.Compare): base совпадает с режимом rag.
+// MinScoreOf — абсолютный порог конвейера и откуда он: Config.MinScore
+// («настройки») → порог индекса kb.IndexInfo.MinScore, записанный
+// калибровкой («индекс») → DefaultMinScore («умолчание»). Одно правило для
+// хука чата, отвечающего агента, окна «База знаний» и kb.
+func MinScoreOf(c Config, idx kb.IndexInfo) (float64, string) {
+	switch {
+	case c.MinScore > 0:
+		return c.MinScore, MinScoreConfig
+	case idx.MinScore > 0:
+		return idx.MinScore, MinScoreIndex
+	}
+	return DefaultMinScore, MinScoreDefault
+}
+
+// Источники порога (Trace.MinScoreFrom).
+const (
+	MinScoreConfig  = "настройки"
+	MinScoreIndex   = "индекс"
+	MinScoreDefault = "умолчание"
+)
+
+// MinScore — порог, который конвейер применит с настройками c, и откуда он
+// (для kb qa и kb ask: напечатать до прогона).
+func (p *Pipeline) MinScore(ctx context.Context, c Config) (float64, string, error) {
+	if p == nil || p.Searcher == nil || p.Searcher.Store == nil {
+		return 0, "", errors.New("конвейеру не передана база знаний")
+	}
+	c = resolve(c)
+	idx, err := p.Searcher.Store.Index(ctx, c.Index)
+	if err != nil {
+		return 0, "", err
+	}
+	v, from := MinScoreOf(c, idx)
+	return v, from, nil
+}
+
+// joinContext — предыдущие реплики и вопрос через пробел: запрос
+// продолжения, когда вида нет ни в одной реплике.
 func joinContext(q Query) string {
 	parts := make([]string, 0, len(q.Context)+1)
 	for _, c := range q.Context {
@@ -194,52 +239,78 @@ func joinContext(q Query) string {
 	return strings.Join(append(parts, strings.TrimSpace(q.Text)), " ")
 }
 
-// rewriteCode — переписывание кодом:
+// rewriteCode — переписывание кодом; запросы для dense и BM25 и заметка:
 //
-//   - синонимы раскрываются в канон и латынь (Aliases.Expand);
-//   - у видов, названных каноном, дописывается латынь: MDD в корпусе
-//     записан латынью («Ailurus fulgens»), и без неё вопрос о статусе или
-//     числе видов ищет MDD только по русскому названию семейства;
-//   - вопрос, в котором вид не назван, получает вид из последней реплики
-//     контекста, где он назван (последний упомянутый там вид); если ни в
-//     одной реплике вида нет — запрос как без переписывания: контекст и
-//     вопрос (с заметкой).
-//
-// Контекст при названном в вопросе виде в запрос не идёт: вопрос
-// самодостаточен, а прошлые реплики тянули бы поиск к прошлой теме.
-func rewriteCode(al *Aliases, q Query) (string, []string, string) {
+//   - синонимы раскрываются в канон (Aliases.Queries); если вид назван
+//     каноном — dense-запрос = реплика без изменений;
+//   - латынь названных видов — только в BM25-запрос: MDD в корпусе записан
+//     латынью («Ailurus fulgens»), и BM25 по ней находит MDD, а dense от
+//     латыни сбивается (на dev доказательство уходило с 1-го места на 4-е);
+//   - реплика без названного вида, которая продолжает разговор
+//     (continuation: местоимение, «а …», «этот», короткая реплика без
+//     животного), получает прошлую реплику, где вид назван (последнюю):
+//     запрос = прошлая реплика + текущая. Не одно название вида: прошлая
+//     реплика несёт и тему («статус МСОП» → «а сколько их осталось?» ищет
+//     численность в разделе о статусе). Если вида нет ни в одной реплике —
+//     контекст и вопрос (с заметкой);
+//   - реплика с названным видом или самостоятельная («Сколько весит
+//     взрослый жираф?») — без контекста: прошлые реплики тянули бы поиск к
+//     прошлой теме.
+func rewriteCode(al *Aliases, q Query) (dense, bm25 string, expanded []string, note string) {
 	text := strings.TrimSpace(q.Text)
-	out, expanded := al.Expand(text)
-	species := al.Species(text)
-	note := ""
-	if len(species) == 0 && len(q.Context) > 0 {
-		found := ""
-		for i := len(q.Context) - 1; i >= 0 && found == ""; i-- {
-			if sp := al.Species(q.Context[i]); len(sp) > 0 {
-				found = sp[len(sp)-1]
-			}
+	dense, bm25, expanded = al.Queries(text)
+	if len(q.Context) == 0 || len(al.Species(text)) > 0 || !continuation(al, text) {
+		return dense, bm25, expanded, ""
+	}
+	for i := len(q.Context) - 1; i >= 0; i-- {
+		prev := strings.TrimSpace(q.Context[i])
+		sp := al.Species(prev)
+		if len(sp) == 0 {
+			continue
 		}
-		if found != "" {
-			out += " " + found
-			if lat := al.Latin[found]; lat != "" {
-				out += " " + lat
-			}
-			expanded = append(expanded, "вид из контекста → "+found)
-		} else {
-			out = joinContext(Query{Text: out, Context: q.Context})
-			note = "вид в контексте не назван — в поиск ушли контекст и вопрос"
+		pd, pb, pl := al.Queries(prev)
+		expanded = append(append(pl, expanded...), "вид из контекста → "+strings.Join(sp, ", "))
+		return pd + " " + dense, pb + " " + bm25, expanded, ""
+	}
+	return joinContext(Query{Text: dense, Context: q.Context}), joinContext(Query{Text: bm25, Context: q.Context}), expanded,
+		"вид в контексте не назван — в поиск ушли контекст и вопрос"
+}
+
+// continuationWords — местоимения и указательные слова, по которым реплика
+// без названного вида считается продолжением («а сколько она весит?»,
+// «какой у этого хвост?»).
+var continuationWords = map[string]bool{
+	"он": true, "она": true, "оно": true, "они": true, "его": true, "ее": true, "их": true, "ему": true, "ей": true, "им": true,
+	"него": true, "нее": true, "них": true, "нему": true, "ней": true, "ним": true, "нем": true, "ими": true, "ею": true, "нею": true,
+	"этот": true, "эта": true, "эти": true, "этого": true, "этой": true, "этих": true, "этому": true, "этим": true,
+	"такой": true, "такая": true, "такие": true, "такого": true, "таких": true,
+}
+
+// shortReply — реплика короче стольких слов без животного — продолжение.
+const shortReply = 5
+
+// continuation — реплика продолжает разговор: в ней нет животного (вида
+// корпуса или другого — animalNouns: «жираф», «ягуар») и есть местоимение
+// или указательное слово, она начинается с «а» или короче shortReply слов.
+func continuation(al *Aliases, text string) bool {
+	toks := tokenize(text)
+	if len(toks) == 0 {
+		return false
+	}
+	for _, t := range toks {
+		if al.animal(t.stem) {
+			return false
 		}
 	}
-	var lat []string
-	for _, s := range species {
-		if l := al.Latin[s]; l != "" && !containsFold(out, l) {
-			lat = append(lat, l)
+	if toks[0].word == "а" {
+		return true
+	}
+	for _, t := range toks {
+		if continuationWords[t.word] {
+			return true
 		}
 	}
-	if len(lat) > 0 {
-		out += " " + strings.Join(lat, " ")
-	}
-	return out, expanded, note
+	return len(toks) < shortReply
 }
 
 // aliases — словарь: заданный или из базы при первом вызове.
@@ -257,12 +328,16 @@ func (p *Pipeline) aliases(ctx context.Context) (*Aliases, error) {
 	return a, nil
 }
 
-// candidates — dense и BM25 по каждому запросу, объединение по chunk_id:
-// лучший балл и лучший ранг каждого вида поиска, сумма RRF по всем
-// спискам. Затем косинус для кандидатов, которых не было в dense-выдаче.
+// candidates — dense и BM25 по каждому запросу (BM25 — по QueriesBM25,
+// если он задан), объединение по chunk_id: лучший балл и лучший ранг
+// каждого вида поиска, сумма RRF по всем спискам. Затем косинус для
+// кандидатов, которых не было в dense-выдаче, и отрыв каждого кандидата от
+// лучшего косинуса своего запроса (lead).
 func (p *Pipeline) candidates(ctx context.Context, c Config, t *Trace) error {
 	s := p.Searcher
 	byID := map[string]int{}
+	// cos[i] — косинусы кандидатов по запросу i (для относительного порога).
+	cos := make([]map[string]float64, len(t.Queries))
 	add := func(h kb.Hit, mode kb.Mode) {
 		i, ok := byID[h.ID]
 		if !ok {
@@ -289,6 +364,7 @@ func (p *Pipeline) candidates(ctx context.Context, c Config, t *Trace) error {
 	}
 	dense := true
 	for i, query := range t.Queries {
+		cos[i] = map[string]float64{}
 		hits, info, err := s.Search(ctx, query, kb.SearchOptions{Index: c.Index, K: c.K0, Mode: kb.Dense})
 		if err != nil {
 			return fmt.Errorf("поиск: %w", err)
@@ -307,8 +383,9 @@ func (p *Pipeline) candidates(ctx context.Context, c Config, t *Trace) error {
 		}
 		for _, h := range hits {
 			add(h, kb.Dense)
+			cos[i][h.ID] = h.Score
 		}
-		hits, _, err = s.Search(ctx, query, kb.SearchOptions{Index: c.Index, K: c.K0, Mode: kb.BM25})
+		hits, _, err = s.Search(ctx, bm25Query(t, i), kb.SearchOptions{Index: c.Index, K: c.K0, Mode: kb.BM25})
 		if err != nil {
 			return fmt.Errorf("поиск BM25: %w", err)
 		}
@@ -330,24 +407,57 @@ func (p *Pipeline) candidates(ctx context.Context, c Config, t *Trace) error {
 			missing = append(missing, x.ID)
 		}
 	}
-	if len(missing) == 0 {
-		return nil
-	}
-	for _, query := range t.Queries {
-		cos, err := s.Score(ctx, c.Index, query, missing)
-		if err != nil {
-			if ctx.Err() != nil {
-				return ctx.Err()
+	if len(missing) > 0 {
+		for i, query := range t.Queries {
+			got, err := s.Score(ctx, c.Index, query, missing)
+			if err != nil {
+				if ctx.Err() != nil {
+					return ctx.Err()
+				}
+				t.Note = joinNote(t.Note, "косинус BM25-кандидатов не посчитан: "+err.Error())
+				break
 			}
-			t.Note = joinNote(t.Note, "косинус BM25-кандидатов не посчитан: "+err.Error())
-			break
-		}
-		for id, v := range cos {
-			x := &t.Candidates[byID[id]]
-			x.Dense = math.Max(x.Dense, v)
+			for id, v := range got {
+				x := &t.Candidates[byID[id]]
+				x.Dense = math.Max(x.Dense, v)
+				cos[i][id] = v
+			}
 		}
 	}
+	leads(t, cos)
 	return nil
+}
+
+// bm25Query — запрос i для BM25: из QueriesBM25, если он там есть.
+func bm25Query(t *Trace, i int) string {
+	if i < len(t.QueriesBM25) && strings.TrimSpace(t.QueriesBM25[i]) != "" {
+		return t.QueriesBM25[i]
+	}
+	return t.Queries[i]
+}
+
+// leads — отрыв кандидата от лучшего косинуса своего запроса: max по
+// запросам (cos_i − лучший cos_i). У одного запроса это Dense − TopDense.
+func leads(t *Trace, cos []map[string]float64) {
+	tops := make([]float64, len(cos))
+	for i, m := range cos {
+		for _, v := range m {
+			tops[i] = math.Max(tops[i], v)
+		}
+	}
+	for j := range t.Candidates {
+		x := &t.Candidates[j]
+		x.hasLead = false
+		for i, m := range cos {
+			v, ok := m[x.ID]
+			if !ok {
+				continue
+			}
+			if d := v - tops[i]; !x.hasLead || d > x.lead {
+				x.lead, x.hasLead = d, true
+			}
+		}
+	}
 }
 
 // order — порядок кандидатов (Final) по реранкингу:
@@ -362,9 +472,18 @@ func (p *Pipeline) candidates(ctx context.Context, c Config, t *Trace) error {
 func order(t *Trace) {
 	cs := t.Candidates
 	rrf := make(map[string]float64, len(cs))
+	second := 0.0
 	for i := range cs {
 		rrf[cs[i].ID] = cs[i].Rerank
-		t.TopDense = math.Max(t.TopDense, cs[i].Dense)
+		switch d := cs[i].Dense; {
+		case d > t.TopDense:
+			second, t.TopDense = t.TopDense, d
+		case d > second:
+			second = d
+		}
+	}
+	if len(cs) > 1 && t.TopDense > 0 {
+		t.Gap = round3(t.TopDense - second)
 	}
 	var less func(a, b Candidate) bool
 	tie := func(a, b Candidate) bool {
@@ -441,7 +560,7 @@ func finish(t *Trace) {
 			switch {
 			case dense && len(t.Anchored) == 0 && x.Dense < t.MinScore:
 				x.Reason = reasonFloor(t.MinScore)
-			case dense && x.Dense < t.TopDense-c.Delta-1e-12 && !exempt(*x, c, half):
+			case dense && x.behind(t.TopDense) > c.Delta+1e-12 && !exempt(*x, c, half):
 				x.Reason = reasonRelative(c.Delta)
 			case !dense && x.BM25 < BM25Floor*topBM25:
 				x.Reason = reasonBM25()
@@ -496,6 +615,15 @@ func duplicate(x Candidate, kept []Candidate) bool {
 		}
 	}
 	return false
+}
+
+// behind — насколько кандидат хуже лучшего косинуса своего запроса (≥ 0):
+// lead, если посчитан, иначе — от общего лучшего.
+func (c Candidate) behind(top float64) float64 {
+	if c.hasLead {
+		return -c.lead
+	}
+	return top - c.Dense
 }
 
 // exempt — кандидат освобождён от относительного порога (см. Search).

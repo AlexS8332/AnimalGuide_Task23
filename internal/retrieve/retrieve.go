@@ -35,10 +35,11 @@ type Rewrite string
 const (
 	RewriteNone Rewrite = ""
 	// RewriteCode — кодом, бесплатно: разговорные названия и синонимы из
-	// корпуса (Species.Aliases, латынь) дополняются каноническим названием
-	// («кошачий медведь» → «… малая панда Ailurus fulgens»); вопрос-продолжение
-	// без названия вида («а сколько она весит?») получает вид из последней
-	// реплики контекста, где он назван.
+	// корпуса (Species.Aliases, «или» вступления, латынь) дополняются
+	// каноническим названием («кошачий медведь» → «… малая панда», латынь —
+	// только в BM25); вопрос-продолжение без названия вида («а сколько она
+	// весит?») получает прошлую реплику, где вид назван. Без переписывания
+	// контекст в запрос не идёт.
 	RewriteCode Rewrite = "code"
 	// RewriteLLM — один запрос к модели: JSON {query, queries[1..3]} —
 	// самодостаточный запрос и до трёх подзапросов для составного вопроса;
@@ -100,30 +101,53 @@ type Candidate struct {
 	// Reason — почему отсечён: "порог 0.80", "хуже лучшего на 0.05",
 	// "повтор текста", "за пределами K1"; пусто — остался.
 	Reason string `json:"reason,omitempty"`
+
+	// lead — косинус против лучшего косинуса своего запроса: max по
+	// запросам (cos − лучший cos этого запроса); 0 — сам лучший. Для
+	// относительного порога (у подзапросов RewriteLLM — свой лучший).
+	// hasLead — посчитан (иначе — Dense − TopDense).
+	lead    float64
+	hasLead bool
 }
 
 // Trace — весь путь поиска.
 type Trace struct {
 	Original  string   `json:"original"`
 	Rewritten string   `json:"rewritten"` // = Original, если не переписан
-	Queries   []string `json:"queries"`   // что ушло в поиск
-	RewriteBy string   `json:"rewrite_by,omitempty"`
+	Queries   []string `json:"queries"`   // что ушло в dense-поиск
+	// QueriesBM25 — что ушло в BM25, по запросу на каждый из Queries: тот же
+	// запрос плюс латынь названных видов (латынь — только в BM25, dense она
+	// сбивает); пусто — те же Queries (добавление v23).
+	QueriesBM25 []string `json:"queries_bm25,omitempty"`
+	RewriteBy   string   `json:"rewrite_by,omitempty"`
 	// Expanded — какие синонимы раскрыты кодом: "кошачий медведь → малая панда".
 	Expanded []string `json:"expanded,omitempty"`
-	// Anchored — виды корпуса, названные в запросах поиска (каноном,
-	// синонимом или латынью; добавление v23). Названный вид — якорь: статья
-	// о нём в базе есть, и абсолютный пол косинуса к такому запросу не
-	// применяется (см. Pipeline.Search).
-	Anchored   []string      `json:"anchored,omitempty"`
-	Config     Config        `json:"config"`
-	MinScore   float64       `json:"min_score"` // фактический порог
-	Candidates []Candidate   `json:"candidates"`
-	Hits       []kb.Hit      `json:"hits"` // итог (Kept) в порядке Final
-	Info       kb.SearchInfo `json:"info"`
-	// Empty — фильтр отсёк всё: в базе ответа, вероятно, нет (v24 скажет
-	// «не знаю»). TopDense — лучший косинус кандидатов.
+	// Anchored — виды корпуса, названные в САМОЙ реплике (каноном,
+	// синонимом или латынью; добавление v23), а не унаследованные из
+	// контекста. Названный вид — якорь: статья о нём в базе есть, и
+	// абсолютный пол косинуса к такому запросу не применяется (см.
+	// Pipeline.Search). У вопроса-продолжения вид из контекста пол не
+	// снимает.
+	Anchored []string `json:"anchored,omitempty"`
+	Config   Config   `json:"config"`
+	MinScore float64  `json:"min_score"` // фактический порог
+	// MinScoreFrom — откуда порог: "настройки", "индекс" или "умолчание"
+	// (MinScoreOf; добавление v23).
+	MinScoreFrom string        `json:"min_score_from,omitempty"`
+	Candidates   []Candidate   `json:"candidates"`
+	Hits         []kb.Hit      `json:"hits"` // итог (Kept) в порядке Final
+	Info         kb.SearchInfo `json:"info"`
+	// Empty — фильтр отсёк всё: в базе ответа, вероятно, нет. TopDense —
+	// лучший косинус кандидатов; Gap — отрыв лучшего от второго (top1 −
+	// top2 по косинусу dense среди кандидатов; добавление v23).
+	//
+	// Для v24: по Anchored, TopDense, Gap и Empty отвечающий решает, говорить
+	// ли «не знаю» — пусто без якоря значит «в базе об этом нет», а якорь с
+	// низким TopDense и малым Gap — «вид есть, нужного аспекта, вероятно,
+	// нет».
 	Empty    bool      `json:"empty"`
 	TopDense float64   `json:"top_dense"`
+	Gap      float64   `json:"gap"`
 	Usage    llm.Usage `json:"usage"`
 	Cost     llm.Cost  `json:"cost"`
 	Millis   int64     `json:"ms"`

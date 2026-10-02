@@ -43,7 +43,7 @@ func rewriteUser(q Query) string {
 // maxSubqueries — подзапросов модели сверх основного.
 const maxSubqueries = 3
 
-// rewriteLLM — переписывание моделью; поверх — синонимы кодом (Expand) по
+// rewriteLLM — переписывание моделью; поверх — синонимы кодом (Queries) по
 // каждому запросу. Неразборчивый ответ — откат на RewriteCode с заметкой.
 func (p *Pipeline) rewriteLLM(ctx context.Context, al *Aliases, q Query, t *Trace) error {
 	resp, err := p.LLM.Chat(ctx, llm.Request{Model: p.model(), Temperature: 0, Messages: []llm.Message{
@@ -62,9 +62,10 @@ func (p *Pipeline) rewriteLLM(ctx context.Context, al *Aliases, q Query, t *Trac
 			why = err.Error()
 		}
 		t.RewriteBy = string(RewriteCode)
-		var note string
-		t.Rewritten, t.Expanded, note = rewriteCode(al, q)
+		var note, bm25 string
+		t.Rewritten, bm25, t.Expanded, note = rewriteCode(al, q)
 		t.Queries = []string{t.Rewritten}
+		t.QueriesBM25 = []string{bm25}
 		t.Note = joinNote(note, "модель ответила неразборчиво ("+clip(why, 120)+") — переписано кодом")
 		return nil
 	}
@@ -76,13 +77,14 @@ func (p *Pipeline) rewriteLLM(ctx context.Context, al *Aliases, q Query, t *Trac
 			return
 		}
 		seen[normQuery(s)] = true
-		exp, list := al.Expand(s)
+		dense, bm25, list := al.Queries(s)
 		for _, x := range list {
 			if !contains(t.Expanded, x) {
 				t.Expanded = append(t.Expanded, x)
 			}
 		}
-		t.Queries = append(t.Queries, exp)
+		t.Queries = append(t.Queries, dense)
+		t.QueriesBM25 = append(t.QueriesBM25, bm25)
 	}
 	add(out.Query)
 	for _, s := range out.Queries {

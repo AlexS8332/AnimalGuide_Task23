@@ -66,7 +66,7 @@ func TestRunMatrixAndCalibrate(t *testing.T) {
 			if q.RankAfter > r.K1 || q.Kept > r.K1 || (q.Empty && q.Kept != 0) {
 				t.Fatalf("%s %s: %+v", r.Name, q.ID, q)
 			}
-			if q.ID == "T07" && r.Name == "rewrite" && !strings.Contains(q.Rewritten, "малая панда Ailurus fulgens") {
+			if q.ID == "T07" && r.Name == "rewrite" && (!strings.HasSuffix(q.Rewritten, "малая панда") || strings.Contains(q.Rewritten, "Ailurus")) {
 				t.Fatalf("T07 не переписан: %q", q.Rewritten)
 			}
 			if q.ID == "T08" && r.Name == "both" && !strings.Contains(q.Rewritten, "харза") {
