@@ -85,8 +85,8 @@ func (p *Pipeline) rewriteLLM(ctx context.Context, al *Aliases, q Query, t *Trac
 		t.Queries = append(t.Queries, exp)
 	}
 	add(out.Query)
-	for i, s := range out.Queries {
-		if i >= maxSubqueries {
+	for _, s := range out.Queries {
+		if len(t.Queries) > maxSubqueries {
 			break
 		}
 		add(s)
