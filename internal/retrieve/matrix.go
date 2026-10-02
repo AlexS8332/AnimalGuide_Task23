@@ -21,11 +21,15 @@ func Presets(paid bool) []Named {
 		{Name: "base"},
 		{Name: "filter", Config: Config{Filter: true}},
 		{Name: "rewrite", Config: Config{Rewrite: RewriteCode}},
-		{Name: "both", Config: Config{Rewrite: RewriteCode, Rerank: RerankHybrid, Filter: true}},
+		// both — переписывание и фильтр. Гибридный реранкинг отдельной
+		// строкой: на dev он не помог (+D02, −D06, −D16), поэтому в both его
+		// нет.
+		{Name: "both", Config: Config{Rewrite: RewriteCode, Filter: true}},
+		{Name: "hybrid", Config: Config{Rewrite: RewriteCode, Rerank: RerankHybrid, Filter: true}},
 	}
 	if paid {
 		out = append(out,
-			Named{Name: "llm-rewrite", Config: Config{Rewrite: RewriteLLM, Rerank: RerankHybrid, Filter: true}},
+			Named{Name: "llm-rewrite", Config: Config{Rewrite: RewriteLLM, Filter: true}},
 			Named{Name: "llm-rerank", Config: Config{Rewrite: RewriteCode, Rerank: RerankLLM, Filter: true}})
 	}
 	return out

@@ -92,14 +92,14 @@ func TestCalibrateAndMatrix(t *testing.T) {
 	}
 
 	md = filepath.Join(dir, "rag", "filter.md")
-	code, out, errOut = runKB("matrix", "-db", db, "-embedder", "hash", "-questions", q, "-k1", "3,5", "-splits", "dev,test,out", "-hybrid", "-out", md)
+	code, out, errOut = runKB("matrix", "-db", db, "-embedder", "hash", "-questions", q, "-k1", "3,5", "-splits", "dev,test,out", "-rrf", "-out", md)
 	if code != exitOK || !strings.Contains(out, "- K1 = 5, dev+test, 27 вопросов с доказательством") || !strings.Contains(out, "JSON: "+filepath.Join(dir, "rag", "filter.json")) ||
-		!strings.Contains(errOut, "конфигураций 5") {
+		!strings.Contains(errOut, "конфигураций 6") {
 		t.Fatalf("matrix: %d\n%s\n%s", code, out, errOut)
 	}
 	var m retrieve.Matrix
 	raw, err = os.ReadFile(filepath.Join(dir, "rag", "filter.json"))
-	if err != nil || json.Unmarshal(raw, &m) != nil || len(m.Rows) != 5*2*3 || m.Configs[4].Name != "hybrid" || m.MinScore != cal.Chosen {
+	if err != nil || json.Unmarshal(raw, &m) != nil || len(m.Rows) != 6*2*3 || m.Configs[5].Name != "rrf-only" || m.MinScore != cal.Chosen {
 		t.Fatalf("filter.json: %v %d %+v", err, len(m.Rows), m.MinScore)
 	}
 	if b, err := os.ReadFile(md); err != nil || !strings.Contains(string(b), "## Вопросы test (K1 = 5)") {

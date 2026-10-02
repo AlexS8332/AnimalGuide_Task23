@@ -20,7 +20,7 @@ func TestModeConfig(t *testing.T) {
 	cases := map[Mode]string{
 		RAGFilter:  "filter",
 		RAGRewrite: "rewrite code",
-		RAGBoth:    "rewrite code, rerank hybrid, filter",
+		RAGBoth:    "rewrite code, filter",
 		RAG:        "dense top-K1, без фильтра и переписывания",
 		NoRAG:      "dense top-K1, без фильтра и переписывания",
 	}
@@ -42,7 +42,7 @@ func TestModeConfig(t *testing.T) {
 	if !c.Filter || c.MinScore != 0.83 || c.Delta != 0.1 || c.Rewrite != retrieve.RewriteCode || c.K0 != 30 || c.K1 != 3 || c.Index != DefaultIndex {
 		t.Fatalf("настройки поверх умолчаний: %+v", c)
 	}
-	if c := a.Config(RAGBoth); c.Rerank != retrieve.RerankHybrid || c.MinScore != 0 || c.K1 != 3 {
+	if c := a.Config(RAGBoth); c.Rerank != retrieve.RerankNone || !c.Filter || c.MinScore != 0 || c.K1 != 3 {
 		t.Fatalf("без переопределения: %+v", c)
 	}
 }
@@ -162,7 +162,7 @@ func TestHookPipeline(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(rec.Events) != 1 || !strings.Contains(rec.Events[0].Title, "(индекс structure, k 3; rag.filter, rag.rewrite)") ||
-		!strings.Contains(rec.Events[0].Detail, "Второй этап поиска (rag.filter, rag.rewrite): rewrite code, rerank hybrid, filter") {
+		!strings.Contains(rec.Events[0].Detail, "Второй этап поиска (rag.filter, rag.rewrite): rewrite code, filter") {
 		t.Fatalf("журнал: %+v", rec.Events)
 	}
 	var tool tools.Tool

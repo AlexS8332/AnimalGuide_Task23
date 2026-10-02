@@ -114,7 +114,11 @@ func ModeConfig(m Mode) retrieve.Config {
 	case RAGRewrite:
 		return retrieve.Config{Rewrite: retrieve.RewriteCode}
 	case RAGBoth:
-		return retrieve.Config{Rewrite: retrieve.RewriteCode, Rerank: retrieve.RerankHybrid, Filter: true}
+		// Без гибридного реранкинга: на dev RRF dense и BM25 дал +D02, но
+		// потерял D06 и D16 (матрица v23, examples/rag/filter.md) — пользы
+		// нет, а порядок кандидатов он портит. Гибрид — отдельная строка
+		// матрицы (retrieve.Presets «hybrid»).
+		return retrieve.Config{Rewrite: retrieve.RewriteCode, Filter: true}
 	}
 	return retrieve.Config{}
 }

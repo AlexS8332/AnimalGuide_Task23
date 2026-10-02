@@ -112,6 +112,7 @@ func wire(o options, registry *features.Registry, defaults features.Set, runner 
 		// rag+filter, rag+rewrite, rag+both.
 		pipe := &retrieve.Pipeline{Searcher: know.api.Searcher, LLM: runner.LLM, Model: runner.Model}
 		know.api.Pipeline = pipe
+		retrieval.Pipeline = pipe
 		know.api.Answerer = &rag.Answerer{LLM: runner.LLM, Model: runner.Model, Searcher: know.api.Searcher, Pipeline: pipe}
 		know.api.Judge = &rag.Judge{LLM: runner.LLM, Model: runner.Model}
 	}

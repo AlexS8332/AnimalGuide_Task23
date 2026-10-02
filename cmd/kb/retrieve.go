@@ -207,7 +207,7 @@ func runMatrix(ctx context.Context, args []string, out, errOut io.Writer) int {
 	k0 := fs.Int("k0", retrieve.DefaultK0, "кандидатов до фильтра")
 	splits := fs.String("splits", "dev,test,out", "наборы через запятую")
 	paid := fs.Bool("paid", false, "добавить платные строки llm-rewrite и llm-rerank (запросы к модели)")
-	hybrid := fs.Bool("hybrid", false, "добавить строку hybrid (только RRF, без фильтра и переписывания)")
+	rrfOnly := fs.Bool("rrf", false, "добавить строку rrf-only (только RRF, без фильтра и переписывания)")
 	minScore := fs.Float64("min-score", 0, "абсолютный порог (0 — из индекса, иначе умолчание)")
 	delta := fs.Float64("delta", 0, "относительный порог (0 — умолчание)")
 	mdPath := fs.String("out", defaultMatrix, "куда записать отчёт markdown (пусто — не писать); JSON — рядом, с расширением .json")
@@ -252,8 +252,8 @@ func runMatrix(ctx context.Context, args []string, out, errOut io.Writer) int {
 		p.LLM, p.Model = llmc, model
 	}
 	configs := retrieve.Presets(*paid)
-	if *hybrid {
-		configs = append(configs, retrieve.Named{Name: "hybrid", Config: retrieve.Config{Rerank: retrieve.RerankHybrid}})
+	if *rrfOnly {
+		configs = append(configs, retrieve.Named{Name: "rrf-only", Config: retrieve.Config{Rerank: retrieve.RerankHybrid}})
 	}
 	for i := range configs {
 		c := &configs[i].Config

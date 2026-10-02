@@ -537,12 +537,12 @@ func TestPresetsAndDescribe(t *testing.T) {
 	for _, n := range Presets(true) {
 		names = append(names, n.Name+"="+n.Config.Describe())
 	}
-	want := "base=dense top-K1, без фильтра и переписывания; filter=filter; rewrite=rewrite code; both=rewrite code, rerank hybrid, filter; " +
-		"llm-rewrite=rewrite llm, rerank hybrid, filter; llm-rerank=rewrite code, rerank llm, filter"
+	want := "base=dense top-K1, без фильтра и переписывания; filter=filter; rewrite=rewrite code; both=rewrite code, filter; " +
+		"hybrid=rewrite code, rerank hybrid, filter; llm-rewrite=rewrite llm, filter; llm-rerank=rewrite code, rerank llm, filter"
 	if got := strings.Join(names, "; "); got != want {
 		t.Fatalf("пресеты:\n%s", got)
 	}
-	if len(Presets(false)) != 4 {
-		t.Fatal("бесплатных — четыре")
+	if len(Presets(false)) != 5 {
+		t.Fatal("бесплатных — пять")
 	}
 }

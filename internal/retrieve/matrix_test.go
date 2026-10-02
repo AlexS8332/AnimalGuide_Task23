@@ -47,8 +47,8 @@ func TestRunMatrixAndCalibrate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(m.Rows) != 4*2*3 || m.Index != "structure" || m.Embedder != "hash-256" || m.MinScore != DefaultMinScore ||
-		m.Delta != DefaultDelta || m.K0 != DefaultK0 || m.Fallback != "" || m.CorpusSHA == "" || len(m.Configs) != 4 {
+	if len(m.Rows) != 5*2*3 || m.Index != "structure" || m.Embedder != "hash-256" || m.MinScore != DefaultMinScore ||
+		m.Delta != DefaultDelta || m.K0 != DefaultK0 || m.Fallback != "" || m.CorpusSHA == "" || len(m.Configs) != 5 {
 		t.Fatalf("матрица: %d строк, %+v", len(m.Rows), m.Configs)
 	}
 	for _, r := range m.Rows {
@@ -79,7 +79,7 @@ func TestRunMatrixAndCalibrate(t *testing.T) {
 	}
 	md := m.Markdown()
 	for _, want := range []string{"# Фильтр релевантности", "## Вывод", "## Матрица", "## Вопросы test (K1 = 5)", "## Вопросы dev (K1 = 5)",
-		"| T07 | synonym |", "`both` — rewrite code, rerank hybrid, filter", "27 вопросов с доказательством", "Выборка мала"} {
+		"| T07 | synonym |", "`both` — rewrite code, filter", "27 вопросов с доказательством", "Выборка мала"} {
 		if !strings.Contains(md, want) {
 			t.Errorf("в отчёте нет %q", want)
 		}
